@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mueble de cocina - Kitchenette
+* source:	https://sketchfab.com/3d-models/mueble-de-cocina-kitchenette-8366c6cf45b949f18bf9656e140c9426
+* author:	franciscomedina77 (https://sketchfab.com/franciscomedina77)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mueble de cocina - Kitchenette" (https://sketchfab.com/3d-models/mueble-de-cocina-kitchenette-8366c6cf45b949f18bf9656e140c9426) by franciscomedina77 (https://sketchfab.com/franciscomedina77) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

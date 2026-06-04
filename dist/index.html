@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador de Cocinas Pro | Smart Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script type="module" crossorigin src="/assets/index-D8LBYfpG.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BAf1_EVA.css">
+</head>
+<body>
+    <!-- Wizard Inicial -->
+    <div id="setup-wizard" class="overlay">
+        <div class="wizard-content glass-panel">
+            <h2>Configura tu Espacio</h2>
+            <div id="asset-loader-status" style="margin-bottom: 15px; font-size: 14px; color: #0071e3;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando modelos 3D...
+            </div>
+            <p>Introduce las medidas reales para escalar el proyecto.<br><b>Suelte sus archivos GLB en el lienzo para añadirlos directamente.</b></p>
+            <div class="input-grid">
+                <div class="input-field">
+                    <label>Ancho (m)</label>
+                    <input type="number" id="room-width" value="5" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label>Fondo (m)</label>
+                    <input type="number" id="room-depth" value="4" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label>Alto (m)</label>
+                    <input type="number" id="room-height" value="2.5" step="0.1">
+                </div>
+            </div>
+            <button type="button" id="start-editor" class="primary-btn">Comenzar diseño</button>
+        </div>
+    </div>
+
+    <div id="selected-item-panel" class="glass-panel selection-toolbar" style="display:none;">
+        <div class="selection-meta">
+            <h3 id="selected-item-name">Nombre del Mueble</h3>
+            <div class="selection-dims">
+                <div class="dim-field">
+                    <div class="dim-label-row">
+                        <label>Ancho</label>
+                        <span id="val-w">0 cm</span>
+                    </div>
+                    <input type="range" id="obj-w" min="10" max="400" step="1">
+                </div>
+                <div class="dim-field">
+                    <div class="dim-label-row">
+                        <label>Alto</label>
+                        <span id="val-h">0 cm</span>
+                    </div>
+                    <input type="range" id="obj-h" min="10" max="400" step="1">
+                </div>
+                <div class="dim-field">
+                    <div class="dim-label-row">
+                        <label>Fondo</label>
+                        <span id="val-d">0 cm</span>
+                    </div>
+                    <input type="range" id="obj-d" min="10" max="400" step="1">
+                </div>
+                <div class="dim-field">
+                    <div class="dim-label-row">
+                        <label>Elevación</label>
+                        <span id="val-y">0 cm</span>
+                    </div>
+                    <input type="range" id="obj-y" min="0" max="250" step="1">
+                </div>
+            </div>
+
+
+        </div>
+        <div class="action-buttons">
+            <button type="button" id="duplicate-item" class="secondary-btn" title="Duplicar"><i class="fas fa-copy"></i></button>
+            <button type="button" id="rotate-item" class="secondary-btn" title="Rotar 90°"><i class="fas fa-redo"></i></button>
+            <button type="button" id="delete-item" class="primary-btn btn-danger" title="Eliminar"><i class="fas fa-trash"></i></button>
+        </div>
+        <!-- Color picker for selected object -->
+        <div class="object-color-row">
+            <label class="color-row-label"><i class="fas fa-palette"></i> Color objeto</label>
+            <div class="object-color-swatches">
+                <button type="button" class="obj-swatch" data-color="#ebe8e2" title="Blanco" style="background:#ebe8e2;"></button>
+                <button type="button" class="obj-swatch" data-color="#1c1c1e" title="Negro" style="background:#1c1c1e;"></button>
+                <button type="button" class="obj-swatch" data-color="#8e8b87" title="Gris piedra" style="background:#8e8b87;"></button>
+                <button type="button" class="obj-swatch" data-color="#c19a6b" title="Madera roble" style="background:#c19a6b;"></button>
+                <button type="button" class="obj-swatch" data-color="#3a5a40" title="Verde bosque" style="background:#3a5a40;"></button>
+                <button type="button" class="obj-swatch" data-color="#4a6fa5" title="Azul marino" style="background:#4a6fa5;"></button>
+                <button type="button" class="obj-swatch" data-color="#c0392b" title="Rojo" style="background:#c0392b;"></button>
+                <label class="obj-swatch obj-swatch--custom" title="Color personalizado">
+                    <i class="fas fa-eye-dropper"></i>
+                    <input type="color" id="object-custom-color" value="#ffffff">
+                </label>
+            </div>
+        </div>
+        <p>Mantén pulsado el mueble y arrástralo por el suelo.</p>
+        <button type="button" id="fit-item" class="secondary-btn" style="margin-top:5px; width:100%; font-size:11px;"><i class="fas fa-expand"></i> Centrar cámara en objeto</button>
+    </div>
+
+    <div id="app" style="opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+        <!-- Paleta de Componentes -->
+        <div class="component-palette">
+
+            <!-- COCINAS -->
+            <button type="button" class="palette-section-header palette-section-header--featured" data-section="kitchen">
+                <i class="fas fa-utensils"></i> Mobiliario Cocina
+                <i class="fas fa-chevron-down palette-chevron"></i>
+            </button>
+            <div class="palette-section-body" id="section-kitchen"></div>
+
+            <!-- ELECTRODOMÉSTICOS -->
+            <button type="button" class="palette-section-header" data-section="appliance">
+                <i class="fas fa-plug"></i> Electrodomésticos
+                <i class="fas fa-chevron-down palette-chevron"></i>
+            </button>
+            <div class="palette-section-body" id="section-appliance"></div>
+
+            <!-- MESAS Y SILLAS -->
+            <button type="button" class="palette-section-header" data-section="seating">
+                <i class="fas fa-couch"></i> Mesas y Sillas
+                <i class="fas fa-chevron-down palette-chevron"></i>
+            </button>
+            <div class="palette-section-body" id="section-seating"></div>
+
+            <!-- ARQUITECTURA -->
+            <button type="button" class="palette-section-header" data-section="architecture">
+                <i class="fas fa-door-open"></i> Arquitectura
+                <i class="fas fa-chevron-down palette-chevron"></i>
+            </button>
+            <div class="palette-section-body" id="section-architecture"></div>
+
+            <!-- DECORACIÓN -->
+            <button type="button" class="palette-section-header" data-section="generic">
+                <i class="fas fa-leaf"></i> Decoración y Varios
+                <i class="fas fa-chevron-down palette-chevron"></i>
+            </button>
+            <div class="palette-section-body" id="section-generic"></div>
+
+        </div>
+
+        <canvas id="three-canvas"></canvas>
+
+        <div class="ui-container">
+            <header>
+                <h1>Configurador Pro</h1>
+                <div id="header-selection-hint">Selecciona un objeto para editar</div>
+            </header>
+
+            <div class="sidebar">
+                <section class="config-section">
+                    <h3>Vista</h3>
+                    <div class="view-toggle">
+                        <button type="button" id="view-3d" class="secondary-btn active"><i class="fas fa-cube"></i> 3D</button>
+                        <button type="button" id="view-2d" class="secondary-btn"><i class="fas fa-layer-group"></i> Plano</button>
+                    </div>
+                    <button type="button" id="reset-camera" class="secondary-btn" style="margin-top:8px; width:100%;"><i class="fas fa-home"></i> Restablecer Cámara</button>
+                </section>
+
+                <section class="config-section">
+                    <h3>Experiencia</h3>
+                    <button type="button" id="toggle-fps" class="secondary-btn"><i class="fas fa-walking"></i> Visita Virtual 3D</button>
+                    <button type="button" id="load-showroom" class="primary-btn btn-showroom"><i class="fas fa-eye"></i> Ver Cocina de Exposición</button>
+                </section>
+
+                <section class="config-section">
+                    <h3>Acabado</h3>
+                    <div class="control-group">
+                        <label>Paredes</label>
+                        <div class="color-grid" id="wall-colors">
+                            <button type="button" class="color-btn wall-swatch active" title="Blanco" data-wall-color="#ffffff" style="background:#ffffff; border:2px solid #ccc;"></button>
+                            <button type="button" class="color-btn wall-swatch" title="Crema" data-wall-color="#f5f0e8" style="background:#f5f0e8;"></button>
+                            <button type="button" class="color-btn wall-swatch" title="Gris claro" data-wall-color="#d9d9d9" style="background:#d9d9d9;"></button>
+                            <button type="button" class="color-btn wall-swatch" title="Azul pálido" data-wall-color="#d6e4f0" style="background:#d6e4f0;"></button>
+                            <button type="button" class="color-btn wall-swatch" title="Verde sage" data-wall-color="#c9d8c5" style="background:#c9d8c5;"></button>
+                            <label class="color-btn wall-swatch wall-swatch--custom" title="Color personalizado" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-eye-dropper" style="font-size:14px;"></i>
+                                <input type="color" id="wall-custom-color" value="#ffffff" style="opacity:0; position:absolute; width:1px; height:1px;">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group" style="margin-top:8px;">
+                        <label>Suelo</label>
+                        <div class="color-grid" id="floor-colors">
+                            <button type="button" class="color-btn floor-swatch active" title="Madera roble" data-floor-color="#c19a6b" style="background:#c19a6b;"></button>
+                            <button type="button" class="color-btn floor-swatch" title="Madera oscura" data-floor-color="#6b4423" style="background:#6b4423;"></button>
+                            <button type="button" class="color-btn floor-swatch" title="Gris cemento" data-floor-color="#9e9e9e" style="background:#9e9e9e;"></button>
+                            <button type="button" class="color-btn floor-swatch" title="Mármol" data-floor-color="#e8e4df" style="background:#e8e4df;"></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer>
+                <button type="button" class="primary-btn">Guardar Proyecto</button>
+            </footer>
+        </div>
+
+        <div id="fps-hint" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:15px 30px; border-radius:50px; z-index:2000; font-family:sans-serif; text-align:center;">
+            <i class="fas fa-keyboard"></i> <b>WASD</b> para moverse | <b>ESC</b> para volver al editor
+        </div>
+
+        <div id="drop-zone-overlay" class="drop-zone-overlay">
+            <div class="drop-zone-content">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Suelta tu archivo GLB aquí</p>
+                <span>Escalado inteligente automático activado</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

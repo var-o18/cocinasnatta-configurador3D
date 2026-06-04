@@ -1,0 +1,298 @@
+// ============================================================
+//  ui.js — Gestión de la interfaz de usuario
+//  Separa toda la lógica DOM del núcleo del editor.
+// ============================================================
+
+import { CATALOG_META, labelFor, refFor } from '../catalog/catalog.js';
+
+
+export class UI {
+    /**
+     * @param {object} handlers - Callbacks que el editor implementa
+     */
+    constructor(handlers) {
+        this.handlers = handlers;
+        this.renderPalette();
+        this._setupViewControls();
+        this._setupActionButtons();
+        this._setupColorPickers();
+        this._setupPalette();
+        this._setupDimInputs();
+    }
+
+
+    // ── Progreso de carga ──────────────────────────────────────
+
+    setLoadingStatus(loaded, total) {
+        const el = document.getElementById('asset-loader-status');
+        if (!el) return;
+        if (loaded < total) {
+            el.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cargando modelos: ${loaded} / ${total}`;
+        } else {
+            el.innerHTML = '<i class="fas fa-check-circle"></i> Modelos listos';
+        }
+    }
+
+    // ── Panel de selección ─────────────────────────────────────
+
+    showSelectionPanel(userData, y = 0) {
+        const panel = document.getElementById('selected-item-panel');
+        const title = document.getElementById('selected-item-name');
+        if (!panel || !title) return;
+
+        title.textContent = userData.catalogLabel || labelFor(userData.type);
+        this._setDimInputs(userData.w, userData.h, userData.d, y);
+        panel.style.display = 'block';
+    }
+
+
+    hideSelectionPanel() {
+        const panel = document.getElementById('selected-item-panel');
+        if (panel) panel.style.display = 'none';
+    }
+
+    updateSelectionLabel(text) {
+        const el = document.getElementById('selected-item-name');
+        if (el) el.textContent = text;
+    }
+
+    getDimInputs() {
+        return {
+            w: parseFloat(document.getElementById('obj-w')?.value) / 100,
+            h: parseFloat(document.getElementById('obj-h')?.value) / 100,
+            d: parseFloat(document.getElementById('obj-d')?.value) / 100,
+            y: parseFloat(document.getElementById('obj-y')?.value) / 100,
+        };
+    }
+
+
+    // ── Wizard ────────────────────────────────────────────────
+
+    setupWizard(onStart) {
+        const btn = document.getElementById('start-editor');
+        if (!btn) return;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const w = parseFloat(document.getElementById('room-width')?.value)  || 5;
+            const d = parseFloat(document.getElementById('room-depth')?.value)  || 4;
+            const h = parseFloat(document.getElementById('room-height')?.value) || 2.5;
+
+            onStart(w, d, h);
+
+            document.getElementById('setup-wizard').style.display = 'none';
+            const app = document.getElementById('app');
+            if (app) { app.style.opacity = '1'; app.style.pointerEvents = 'auto'; }
+        });
+    }
+
+    blockWizardStart(reason) {
+        alert(reason);
+    }
+
+    // ── Métodos privados ──────────────────────────────────────
+
+    _setDimInputs(w, h, d, y = 0) {
+        const update = (id, val) => {
+            const input = document.getElementById(`obj-${id}`);
+            const span  = document.getElementById(`val-${id}`);
+            const valCm = Math.round(val * 100);
+            if (input) input.value = valCm;
+            if (span) span.textContent = `${valCm} cm`;
+        };
+        update('w', w);
+        update('h', h);
+        update('d', d);
+        update('y', y);
+    }
+
+
+
+    _setupViewControls() {
+        document.getElementById('view-2d')?.addEventListener('click', () => {
+            this.handlers.onViewChange?.('2d');
+            document.getElementById('view-2d').classList.add('active');
+            document.getElementById('view-3d').classList.remove('active');
+        });
+        document.getElementById('view-3d')?.addEventListener('click', () => {
+            this.handlers.onViewChange?.('3d');
+            document.getElementById('view-3d').classList.add('active');
+            document.getElementById('view-2d').classList.remove('active');
+        });
+        document.getElementById('reset-camera')?.addEventListener('click', () => this.handlers.onResetCamera?.());
+        document.getElementById('fit-item')?.addEventListener('click', () => this.handlers.onFitCamera?.());
+    }
+
+    _setupActionButtons() {
+        document.getElementById('delete-item')?.addEventListener('click',    () => this.handlers.onDelete?.());
+        document.getElementById('rotate-item')?.addEventListener('click',    () => this.handlers.onRotate?.());
+        document.getElementById('duplicate-item')?.addEventListener('click', () => this.handlers.onDuplicate?.());
+        document.getElementById('load-showroom')?.addEventListener('click',  () => this.handlers.onLoadShowroom?.());
+    }
+
+    _setupColorPickers() {
+        // Color de objeto
+        document.querySelectorAll('.obj-swatch[data-color]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handlers.onObjectColor?.(btn.dataset.color);
+            });
+        });
+        const objCustom = document.getElementById('object-custom-color');
+        objCustom?.addEventListener('input',  (e) => { e.stopPropagation(); this.handlers.onObjectColor?.(e.target.value); });
+        objCustom?.addEventListener('change', (e) => { e.stopPropagation(); this.handlers.onObjectColor?.(e.target.value); });
+
+        // Color de paredes
+        document.querySelectorAll('.wall-swatch[data-wall-color]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handlers.onWallColor?.(btn.dataset.wallColor);
+                document.querySelectorAll('.wall-swatch').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        const wallCustom = document.getElementById('wall-custom-color');
+        wallCustom?.addEventListener('input',  (e) => { e.stopPropagation(); this.handlers.onWallColor?.(e.target.value); });
+        wallCustom?.addEventListener('change', (e) => {
+            e.stopPropagation();
+            this.handlers.onWallColor?.(e.target.value);
+            document.querySelectorAll('.wall-swatch').forEach(b => b.classList.remove('active'));
+            e.target.closest('.wall-swatch')?.classList.add('active');
+        });
+
+        // Color de suelo
+        document.querySelectorAll('.floor-swatch[data-floor-color]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handlers.onFloorColor?.(btn.dataset.floorColor);
+                document.querySelectorAll('.floor-swatch').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    // ── Renderizado Dinámico ───────────────────────────────────
+
+    renderPalette() {
+        const sections = {
+            kitchen:      document.getElementById('section-kitchen'),
+            appliance:    document.getElementById('section-appliance'),
+            seating:      document.getElementById('section-seating'), // Combinamos mesa y silla
+            architecture: document.getElementById('section-architecture'),
+            generic:      document.getElementById('section-generic'),
+        };
+
+        // Limpiar secciones
+        Object.values(sections).forEach(s => { if (s) s.innerHTML = ''; });
+
+        Object.entries(CATALOG_META).forEach(([type, meta]) => {
+            let sectionKey = meta.category;
+            if (sectionKey === 'table' || sectionKey === 'chair') sectionKey = 'seating';
+            if (sectionKey === 'door' || sectionKey === 'window') sectionKey = 'architecture';
+
+            const section = sections[sectionKey] || sections.generic;
+            if (!section) return;
+
+            const item = document.createElement('div');
+            item.className = 'palette-item';
+            item.setAttribute('draggable', 'true');
+            item.dataset.type = type;
+            item.dataset.label = meta.label;
+            item.dataset.ref = meta.ref;
+
+            item.innerHTML = `
+                <span class="palette-icon">${meta.icon || '📦'}</span>
+                <button type="button" class="palette-fav" aria-label="Favorito"><i class="far fa-heart"></i></button>
+                <div class="palette-meta">
+                    <span class="palette-title">${meta.label}</span>
+                    <span class="palette-ref">${meta.ref}</span>
+                </div>
+            `;
+            section.appendChild(item);
+        });
+    }
+
+    _setupPalette() {
+
+        // Acordeón
+        document.querySelectorAll('.palette-section-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const body    = document.getElementById(`section-${header.dataset.section}`);
+                if (!body) return;
+                const isOpen  = body.style.display === 'block';
+
+                // Cerrar todos
+                document.querySelectorAll('.palette-section-body').forEach(b => b.style.display = 'none');
+                document.querySelectorAll('.palette-chevron').forEach(c => c.style.transform = 'rotate(0deg)');
+
+                if (!isOpen) {
+                    body.style.display = 'block';
+                    header.querySelector('.palette-chevron')?.style.setProperty('transform', 'rotate(180deg)');
+                }
+            });
+        });
+
+        // Abrir primera sección por defecto
+        const firstBody    = document.querySelector('.palette-section-body');
+        const firstChevron = document.querySelector('.palette-chevron');
+        if (firstBody)    firstBody.style.display = 'block';
+        if (firstChevron) firstChevron.style.transform = 'rotate(180deg)';
+
+        // Favoritos
+        document.querySelector('.component-palette')?.addEventListener('click', (e) => {
+            const fav = e.target.closest('.palette-fav');
+            if (!fav) return;
+            e.preventDefault();
+            e.stopPropagation();
+            fav.classList.toggle('is-favorite');
+            const icon = fav.querySelector('i');
+            icon?.classList.toggle('far');
+            icon?.classList.toggle('fas');
+        });
+
+        // Click en ítem de paleta → añadir al centro
+        document.querySelectorAll('.palette-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                if (e.target.closest('.palette-fav')) { e.preventDefault(); return; }
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('application/json', JSON.stringify({
+                    type:  item.dataset.type,
+                    label: item.dataset.label || '',
+                    ref:   item.dataset.ref   || '',
+                }));
+                e.dataTransfer.setData('text/plain', item.dataset.type);
+            });
+
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.palette-fav')) return;
+                e.stopPropagation();
+                this.handlers.onAddModule?.(
+                    item.dataset.type,
+                    0, 0,
+                    item.dataset.label || null,
+                    item.dataset.ref   || null,
+                );
+            });
+        });
+    }
+
+    _setupDimInputs() {
+        ['obj-w', 'obj-h', 'obj-d', 'obj-y'].forEach(id => {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+
+            const handleUpdate = () => {
+                const valSpan = document.getElementById(`val-${id.split('-')[1]}`);
+                if (valSpan) valSpan.textContent = `${input.value} cm`;
+                this.handlers.onDimChange?.();
+            };
+
+            input.addEventListener('input', handleUpdate);
+            input.addEventListener('change', handleUpdate);
+        });
+    }
+
+}
