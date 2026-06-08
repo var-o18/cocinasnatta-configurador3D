@@ -81,6 +81,15 @@ export class UI {
         });
     }
 
+    setupReset(onReset) {
+        const btn = document.getElementById('reset-design');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            onReset();
+        });
+    }
+
     setupSendRequest(onSend) {
         const btn = document.getElementById('send-request');
         if (!btn) return;

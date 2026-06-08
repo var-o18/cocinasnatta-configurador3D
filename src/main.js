@@ -65,6 +65,7 @@ class KitchenEditor {
 
         this.ui.setupSave(() => this._saveProject());
         this.ui.setupSendRequest(() => this._sendDesignRequest());
+        this.ui.setupReset(() => this._resetDesign());
         this.ui.updateProjectSummary(null);
 
         this.assetLoader = new AssetLoader(
@@ -611,6 +612,33 @@ class KitchenEditor {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    _resetDesign() {
+        if (!confirm('¿Resetear el diseño? Esta acción eliminará todos los módulos y volverá a valores iniciales.')) return;
+
+        // Remove all modules from scene
+        this.modules.forEach(m => this.scene.remove(m));
+        this.modules = [];
+
+        // Clear selection and dim lines
+        this.deselect();
+
+        // Reset user info
+        this.userEmail = '';
+        this.userDescription = '';
+
+        // Reset room to sensible defaults
+        const DEFAULTS = { width: 5, depth: 4, height: 2.5 };
+        this.room.build(DEFAULTS.width, DEFAULTS.depth, DEFAULTS.height);
+        this.room.setWallColor('#ffffff');
+        this.room.setFloorColor('#c19a6b');
+        this.roomColors = { wall: '#ffffff', floor: '#c19a6b' };
+
+        // Reset camera and UI
+        this._updateOrthoCamera();
+        this._resetCamera();
+        this.ui.updateProjectSummary(null);
     }
 
     _sendDesignRequest() {
