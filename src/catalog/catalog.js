@@ -1,10 +1,4 @@
-// ============================================================
-//  catalog.js — Definición de todos los assets del catálogo
-// ============================================================
-
 export const CATALOG_META = {
-
-    // ── Cocinas completas ──────────────────────────────────────
     cocina: {
         label: 'Cocina Estándar', ref: 'KIT-STD',
         path: '/cocina.glb', format: 'glb', category: 'kitchen', icon: '🍳'
@@ -33,8 +27,6 @@ export const CATALOG_META = {
         label: 'Cocina Professional FBX', ref: 'KIT-FBX-PRO',
         path: '/Kitchen_FBX.FBX', format: 'fbx', category: 'kitchen', icon: '🏢'
     },
-
-    // ── Electrodomésticos (Nuevos) ──────────────────────────────
     extractor1: { label: 'Extractor Slim', ref: 'EXT-01', path: '/extractor1.glb', format: 'glb', category: 'appliance', icon: '🔌' },
     extractor2: { label: 'Extractor Industrial', ref: 'EXT-02', path: '/extractor2.glb', format: 'glb', category: 'appliance', icon: '🔌' },
     frigo1: { label: 'Frigorífico Americano', ref: 'FRI-01', path: '/frigo1.glb', format: 'glb', category: 'appliance', icon: '❄️' },
@@ -54,8 +46,6 @@ export const CATALOG_META = {
     microondas1: { label: 'Microondas Grill', ref: 'MW-01', path: '/microondas1.glb', format: 'glb', category: 'appliance', icon: '🍱' },
     microondas2: { label: 'Microondas Digital', ref: 'MW-02', path: '/microondas2.glb', format: 'glb', category: 'appliance', icon: '🍱' },
     microondas3: { label: 'Microondas Inox', ref: 'MW-03', path: '/microondas3.glb', format: 'glb', category: 'appliance', icon: '🍱' },
-
-    // ── Muebles (Nuevos) ────────────────────────────────────────
     mueble1: { label: 'Módulo Base 1P', ref: 'CAB-B1', path: '/mueble1.glb', format: 'glb', category: 'kitchen', icon: '📦' },
     mueble2: { label: 'Módulo Base 2P', ref: 'CAB-B2', path: '/mueble2.glb', format: 'glb', category: 'kitchen', icon: '📦' },
     mueble3: { label: 'Módulo Bajo Cajones', ref: 'CAB-DR', path: '/mueble3.glb', format: 'glb', category: 'kitchen', icon: '📦' },
@@ -74,8 +64,6 @@ export const CATALOG_META = {
     estanteria1: { label: 'Estantería Metal', ref: 'SH-MET', path: '/estanteria1.glb', format: 'glb', category: 'kitchen', icon: '🪜' },
     estanteria2: { label: 'Estantería Madera', ref: 'SH-WD', path: '/estanteria2.glb', format: 'glb', category: 'kitchen', icon: '🪜' },
     estanteria3: { label: 'Librería Cocina', ref: 'SH-BK', path: '/estanteria3.glb', format: 'glb', category: 'kitchen', icon: '🪜' },
-
-    // ── Mesas y Sillas ──────────────────────────────────────────
     mesa1: { label: 'Mesa Redonda', ref: 'TBL-RD', path: '/mesa1.glb', format: 'glb', category: 'table', icon: '🪵' },
     mesa2: { label: 'Mesa Familiar', ref: 'TBL-FAM', path: '/mesa2.glb', format: 'glb', category: 'table', icon: '🪵' },
     mesa3: { label: 'Mesa Moderna', ref: 'TBL-MOD', path: '/mesa3.glb', format: 'glb', category: 'table', icon: '🪵' },
@@ -98,8 +86,6 @@ export const CATALOG_META = {
     taburete5: { label: 'Taburete Industrial', ref: 'ST-IND', path: '/taburete5.glb', format: 'glb', category: 'chair', icon: '🪑' },
     taburete6: { label: 'Taburete Bajo', ref: 'ST-LOW', path: '/taburete6.glb', format: 'glb', category: 'chair', icon: '🪑' },
     taburete7: { label: 'Taburete Giratorio', ref: 'ST-ROT', path: '/taburete7.glb', format: 'glb', category: 'chair', icon: '🪑' },
-
-    // ── Arquitectura (Nuevos) ───────────────────────────────────
     puerta1: { label: 'Puerta Standard', ref: 'DOOR-STD', path: '/puerta1.glb', format: 'glb', category: 'door', icon: '🚪' },
     puerta2: { label: 'Puerta Modern', ref: 'DOOR-MOD', path: '/puerta2.glb', format: 'glb', category: 'door', icon: '🚪' },
     puerta3: { label: 'Puerta Clásica', ref: 'DOOR-CLS', path: '/puerta3.glb', format: 'glb', category: 'door', icon: '🚪' },
@@ -110,8 +96,6 @@ export const CATALOG_META = {
     ventana3: { label: 'Ventana Pro', ref: 'WIN-PRO', path: '/ventana3.glb', format: 'glb', category: 'window', icon: '🪟' },
     ventana4: { label: 'Ventana Oscilo', ref: 'WIN-OSC', path: '/ventana4.glb', format: 'glb', category: 'window', icon: '🪟' },
     ventana5: { label: 'Ventana Grande', ref: 'WIN-GRD', path: '/ventana5.glb', format: 'glb', category: 'window', icon: '🪟' },
-
-    // ── Accesorios y Decoración ────────────────────────────────
     bandeja_te: { label: 'Bandeja de Té', ref: 'ACC-TEA', path: '/bandeja_te.glb', format: 'glb', category: 'generic', icon: '🍵' },
     cafetera: { label: 'Cafetera Espresso', ref: 'ACC-COF', path: '/cafetera.glb', format: 'glb', category: 'generic', icon: '☕' },
     estanteria_comida: { label: 'Organizador Comida', ref: 'ACC-FOOD', path: '/estanteria_comida.glb', format: 'glb', category: 'generic', icon: '🍱' },
@@ -127,29 +111,22 @@ export const CATALOG_META = {
     papelera2: { label: 'Papelera Pedal', ref: 'BIN-02', path: '/papelera2.glb', format: 'glb', category: 'generic', icon: '🗑️' },
 };
 
-// ── Helpers ────────────────────────────────────────────────────
-
-/** Nombre visible de un tipo */
 export function labelFor(type) {
     return CATALOG_META[type]?.label ?? type;
 }
 
-/** Referencia de un tipo */
 export function refFor(type) {
     return CATALOG_META[type]?.ref ?? '';
 }
 
-/** Categoría de un tipo (para escalado y posicionamiento automático) */
 export function categoryFor(type) {
     return CATALOG_META[type]?.category ?? 'generic';
 }
 
-/** Icono de un tipo */
 export function iconFor(type) {
     return CATALOG_META[type]?.icon ?? '📦';
 }
 
-/** Infiere la categoría a partir del nombre de archivo */
 export function inferCategoryFromFilename(filename) {
     const n = filename.toLowerCase();
     if (n.includes('cocina') || n.includes('kitchen') || n.includes('mueble') || n.includes('estanteria')) return 'kitchen';

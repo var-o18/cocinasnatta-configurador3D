@@ -1,49 +1,37 @@
-// ============================================================
-//  main.js — Orquestador principal del Configurador de Cocinas
-//  Dependencias: Three.js, OrbitControls, UI, Room, AssetLoader
-// ============================================================
-
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { CATALOG_META, labelFor, refFor, categoryFor } from './catalog.js';
-import { AssetLoader }                    from './loader.js';
-import { Room }                           from './room.js';
-import { UI }                             from './ui.js';
-
-console.log('[KitchenEditor] main.js cargando…');
-
-// ─────────────────────────────────────────────────────────────────
-//  Clase principal
-// ─────────────────────────────────────────────────────────────────
+import { CATALOG_META, labelFor, refFor, categoryFor } from './catalog/catalog.js';
+import { AssetLoader }                    from './core/loader.js';
+import { Room }                           from './core/room.js';
+import { UI }                             from './ui/ui.js';
 
 class KitchenEditor {
     constructor() {
         this.canvas = document.querySelector('#three-canvas');
-        if (!this.canvas) { console.error('Canvas no encontrado'); return; }
+        if (!this.canvas) { return; }
 
-        // Estado
-        this.modules        = [];     // THREE.Group[] de objetos en escena
+        this.modules        = [];
         this.selectedModule = null;
         this.draggingModule = false;
         this.viewMode       = '3d';
         this.isLoadingAssets = true;
+        this.userEmail      = '';
+        this.userDescription = '';
+        this.roomColors     = { wall: '#ffffff', floor: '#c19a6b' };
 
-        // Helpers Three.js
         this.scene    = new THREE.Scene();
-        this.scene.background = new THREE.Color('#f5f5f7');
+        this.scene.background = new THREE.Color('#ffffff');
         this.raycaster = new THREE.Raycaster();
         this.mouse     = new THREE.Vector2();
         this.dimLines  = new THREE.Group();
         this.scene.add(this.dimLines);
 
-        // Sistemas core
         this._setupRenderer();
         this._setupCameras();
         this._setupLights();
         this._setupOrbitControls();
 
-        // Subsistemas
         this.room = new Room(this.scene);
 
         this.ui = new UI({
@@ -55,24 +43,27 @@ class KitchenEditor {
             onDuplicate:     ()          => this._duplicateSelected(),
             onLoadShowroom:  ()          => this._loadShowroom(),
             onObjectColor:   (hex)       => this._applyColorToSelected(hex),
-            onWallColor:     (hex)       => this.room.setWallColor(hex),
-            onFloorColor:    (hex)       => this.room.setFloorColor(hex),
+            onWallColor:     (hex)       => { this.room.setWallColor(hex); this.roomColors.wall = hex; },
+            onFloorColor:    (hex)       => { this.room.setFloorColor(hex); this.roomColors.floor = hex; },
             onAddModule:     (t,x,z,l,r) => this.createModule(t, x, z, l, r),
             onDimChange:     ()          => this._applyDimInputs(),
         });
 
-        this.ui.setupWizard((w, d, h) => {
+        this.ui.setupWizard((w, d, h, email, desc) => {
             if (this.isLoadingAssets) {
                 this.ui.blockWizardStart('Espera a que los modelos terminen de cargar.');
                 return;
             }
+            this.userEmail       = email;
+            this.userDescription = desc;
             this.room.build(w, d, h);
             this._updateOrthoCamera();
             this.orbitControls.target.set(0, 1, 0);
             this.orbitControls.update();
         });
 
-        // Carga de assets
+        this.ui.setupSave(() => this._saveProject());
+
         this.assetLoader = new AssetLoader(
             { width: 5, depth: 4 },
             (loaded, total) => {
@@ -82,18 +73,14 @@ class KitchenEditor {
         );
         this.assetLoader.loadAll().then(models => {
             this.models = models;
-            console.log('[KitchenEditor] Todos los assets listos:', Object.keys(models));
         });
 
-        // Eventos
         this._setupPointerEvents();
         this._setupDragAndDrop();
         window.addEventListener('resize', () => this._onWindowResize());
 
         this._animate();
     }
-
-    // ── Configuración Three.js ────────────────────────────────
 
     _setupRenderer() {
         try {
@@ -108,7 +95,7 @@ class KitchenEditor {
             this.renderer.setPixelRatio(1);
             this.renderer.shadowMap.enabled = true;
         } catch (err) {
-            console.error('WebGL falló:', err);
+            console.error(err);
             alert('Error crítico: No se pudo iniciar WebGL.\nActiva la aceleración por hardware en tu navegador.');
             throw err;
         }
@@ -153,8 +140,6 @@ class KitchenEditor {
         return this.viewMode === '3d' ? this.camera : this.orthoCamera;
     }
 
-    // ── Eventos de puntero ────────────────────────────────────
-
     _setupPointerEvents() {
         window.addEventListener('pointerdown', (e) => {
             if (this._isUITarget(e.target)) return;
@@ -169,7 +154,6 @@ class KitchenEditor {
                     this.selectItem(obj);
                     this.draggingModule = true;
                     this.orbitControls.enabled = false;
-                    // Feedback visual de selección
                     obj.scale.multiplyScalar(1.05);
                     setTimeout(() => obj.scale.divideScalar(1.05), 100);
                 }
@@ -217,7 +201,6 @@ class KitchenEditor {
         });
     }
 
-    /** Devuelve true si el evento ocurrió sobre un elemento de la UI */
     _isUITarget(target) {
         if (target.closest('#setup-wizard')) return true;
         if (target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.tagName === 'A') return true;
@@ -225,20 +208,16 @@ class KitchenEditor {
         return false;
     }
 
-    /** Actualiza this.mouse desde un PointerEvent */
     _updateMouse(e) {
         const rect = this.renderer.domElement.getBoundingClientRect();
         this.mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
         this.mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
     }
 
-    /** Sube por la jerarquía del objeto hasta encontrar el wrapper en this.modules */
     _findModule(obj) {
         while (obj && !this.modules.includes(obj)) obj = obj.parent;
         return this.modules.includes(obj) ? obj : null;
     }
-
-    // ── Drag & Drop desde paleta y desde escritorio ───────────
 
     _setupDragAndDrop() {
         const canvas     = this.canvas;
@@ -254,7 +233,6 @@ class KitchenEditor {
             e.preventDefault();
             dropZone?.classList.remove('active');
 
-            // Archivo externo (GLB/GLTF desde escritorio)
             if (e.dataTransfer.files?.length > 0) {
                 const file = e.dataTransfer.files[0];
                 const name = file.name.toLowerCase();
@@ -264,9 +242,8 @@ class KitchenEditor {
                 }
             }
 
-            // Ítem de paleta (drag interno)
             let payload = null;
-            try { payload = JSON.parse(e.dataTransfer.getData('application/json')); } catch { /* ok */ }
+            try { payload = JSON.parse(e.dataTransfer.getData('application/json')); } catch { }
             const type = payload?.type || e.dataTransfer.getData('text/plain');
             if (!type) return;
 
@@ -275,7 +252,6 @@ class KitchenEditor {
         });
     }
 
-    /** Importa un archivo GLB soltado desde el escritorio */
     async _handleFileImport(file, event) {
         const status = document.getElementById('asset-loader-status');
         const name   = file.name.replace(/\.[^/.]+$/, '');
@@ -297,12 +273,11 @@ class KitchenEditor {
                 setTimeout(() => { status.innerHTML = ''; }, 4000);
             }
         } catch (err) {
-            console.error('[Import] Error:', err);
+            console.error(err);
             alert('Error al procesar el archivo GLB. ¿Es un archivo 3D válido?');
         }
     }
 
-    /** Convierte coordenadas de drop en posición 3D en el suelo */
     _dropPosition(event) {
         this._updateMouse(event);
         this.raycaster.setFromCamera(this.mouse, this._activeCamera);
@@ -310,19 +285,12 @@ class KitchenEditor {
         return hits.length > 0 ? { x: hits[0].point.x, z: hits[0].point.z } : { x: 0, z: 0 };
     }
 
-    // ── Creación de módulos ───────────────────────────────────
-
-    /**
-     * Crea e instancia un módulo en la escena.
-     */
     createModule(type, x = 0, z = 0, catalogLabel = null, catalogRef = null) {
         const model = this.models?.[type];
 
         if (!model) {
             if (this.isLoadingAssets) {
                 alert('Los modelos aún se están descargando. Por favor, espera unos segundos.');
-            } else {
-                console.warn(`[Editor] Tipo "${type}" no disponible.`);
             }
             return null;
         }
@@ -331,21 +299,15 @@ class KitchenEditor {
         const ref     = catalogRef   || refFor(type);
         const wrapper = this._wrapModel(model.clone(), type, label, ref);
 
-        // Escalar si excede la habitación
         this._clampToRoom(wrapper);
-
-        // Posicionamiento automático según category del catálogo.
-        // Al añadir productos nuevos en catalog.js esto funciona sin cambiar nada aquí.
         this._autoPlace(wrapper, x, z);
 
         this.scene.add(wrapper);
         this.modules.push(wrapper);
         this.selectItem(wrapper);
-        console.log(`[Editor] Módulo "${type}" creado en`, wrapper.position);
         return wrapper;
     }
 
-    /** Envuelve un modelo en un Group con userData unificado */
     _wrapModel(model, type, catalogLabel, catalogRef) {
         const wrapper = new THREE.Group();
         wrapper.add(model);
@@ -359,7 +321,6 @@ class KitchenEditor {
         return wrapper;
     }
 
-    /** Reduce la escala de un grupo para que quepa en la habitación */
     _clampToRoom(group) {
         const ud      = group.userData;
         const maxW    = this.room.dims.width  * 0.95;
@@ -371,17 +332,6 @@ class KitchenEditor {
         }
     }
 
-    // ── Selección y manipulación ──────────────────────────────
-
-    /**
-     * Posiciona automáticamente un módulo según su category:
-     *   - 'door' / 'window'  → snap a la pared más cercana al punto de drop
-     *   - 'kitchen'/'appliance' → pegado a la pared trasera (z negativo máximo)
-     *   - 'chair'            → cerca de la mesa más cercana, si existe
-     *   - 'table' / resto    → centro de la habitación o punto de drop
-     *
-     * Si el punto de drop está ocupado, busca el hueco libre más cercano.
-     */
     _autoPlace(wrapper, dropX, dropZ) {
         const category = wrapper.userData.category ?? 'generic';
 
@@ -393,16 +343,13 @@ class KitchenEditor {
             const nearestWall = this.room.nearestWall(targetPos);
             this.room.snapToWall(wrapper, nearestWall, nearestWall.position.clone(), category);
             
-            // Si es extractor, subirlo un poco por defecto (ej. 1.5m)
             if (type.includes('extractor')) {
                 wrapper.position.y = 1.5;
             }
             return;
         }
 
-
         if (category === 'kitchen' || category === 'appliance') {
-            // Pegar a la pared trasera, centrado en X si no hay un drop explícito
             const z   = -this.room.dims.depth / 2 + (wrapper.userData.d ?? 0.6) / 2 + 0.01;
             const x   = (dropX !== 0) ? dropX : this._nextWallX(wrapper.userData.w ?? 0.6);
             wrapper.position.set(x, 0, z);
@@ -411,7 +358,6 @@ class KitchenEditor {
         }
 
         if (category === 'chair') {
-            // Colocar cerca de la primera mesa que haya en escena
             const mesa = this.modules.find(m => m.userData.category === 'table');
             if (mesa) {
                 const offset = (mesa.userData.d ?? 0.75) / 2 + (wrapper.userData.d ?? 0.45) / 2 + 0.05;
@@ -419,19 +365,13 @@ class KitchenEditor {
                 this.room.keepInside(wrapper);
                 return;
             }
-            // Sin mesa: caer al centro
         }
 
-        // Default: punto de drop o centro
         const freePos = this._findFreeSpot(dropX, dropZ, wrapper.userData.w ?? 0.5, wrapper.userData.d ?? 0.5);
         wrapper.position.set(freePos.x, 0, freePos.z);
         this.room.keepInside(wrapper);
     }
 
-    /**
-     * Calcula la siguiente posición X libre junto a la pared trasera,
-     * considerando los módulos ya colocados allí.
-     */
     _nextWallX(newWidth) {
         const wallModules = this.modules.filter(m =>
             (m.userData.category === 'kitchen' || m.userData.category === 'appliance') &&
@@ -439,20 +379,15 @@ class KitchenEditor {
         );
         if (wallModules.length === 0) return 0;
 
-        // Ordenar por X y colocar a la derecha del último
         wallModules.sort((a, b) => a.position.x - b.position.x);
         const last = wallModules[wallModules.length - 1];
         return last.position.x + (last.userData.w ?? 0.6) / 2 + newWidth / 2 + 0.02;
     }
 
-    /**
-     * Encuentra la primera posición libre cerca de (x, z) sin solapar
-     * con módulos existentes. Busca en espiral con paso de 0.5 m.
-     */
     _findFreeSpot(x, z, w, d) {
         const PAD  = 0.1;
         const STEP = 0.5;
-        const MAX  = 20; // iteraciones máximas
+        const MAX  = 20;
 
         const occupied = (cx, cz) => this.modules.some(m => {
             const dx = Math.abs(m.position.x - cx);
@@ -463,8 +398,7 @@ class KitchenEditor {
 
         if (!occupied(x, z)) return { x, z };
 
-        // Espiral cuadrada
-        let cx = x, cz = z, step = STEP, dir = 0;
+        let cx = x, cz = z, step = STEP;
         for (let i = 0; i < MAX; i++) {
             const moves = [[STEP, 0], [0, STEP], [-STEP, 0], [0, -STEP]];
             for (const [dx, dz] of moves) {
@@ -473,7 +407,7 @@ class KitchenEditor {
             }
             step += STEP;
         }
-        return { x, z }; // fallback al punto original
+        return { x, z };
     }
 
     selectItem(obj) {
@@ -482,7 +416,6 @@ class KitchenEditor {
         this.ui.showSelectionPanel(obj.userData, obj.position.y);
         this._updateDimLines();
     }
-
 
     deselect() {
         this.draggingModule = false;
@@ -523,8 +456,6 @@ class KitchenEditor {
         this.createModule('cocina_genova', 0, 0);
     }
 
-    // ── Colores ───────────────────────────────────────────────
-
     _applyColorToSelected(hexColor) {
         if (!this.selectedModule) return;
         const color = new THREE.Color(hexColor);
@@ -534,8 +465,6 @@ class KitchenEditor {
             mats.forEach(mat => { mat.color.set(color); mat.needsUpdate = true; });
         });
     }
-
-    // ── Dimensiones desde inputs ──────────────────────────────
 
     _applyDimInputs() {
         if (!this.selectedModule) return;
@@ -552,15 +481,11 @@ class KitchenEditor {
         );
         Object.assign(ud, { w, h, d });
         
-        // Actualizar elevación (Y)
         this.selectedModule.position.y = y;
 
         this.room.keepInside(this.selectedModule);
         this._updateDimLines();
     }
-
-
-    // ── Líneas de dimensión ───────────────────────────────────
 
     _updateDimLines() {
         this.dimLines.clear();
@@ -568,7 +493,7 @@ class KitchenEditor {
 
         const pos    = this.selectedModule.position;
         const { width, depth } = this.room.dims;
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x0071e3, transparent: true, opacity: 0.6 });
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xc99a6b, transparent: true, opacity: 0.6 });
 
         const targets = [
             new THREE.Vector3(pos.x,         0.1, -depth / 2),
@@ -581,7 +506,6 @@ class KitchenEditor {
             this.dimLines.add(new THREE.Line(geo, lineMat));
         });
 
-        // Actualizar etiqueta con distancia a la pared trasera
         const distToBack = Math.round(new THREE.Vector3(pos.x, 0, pos.z).distanceTo(targets[0]) * 1000);
         if (distToBack > 50) {
             const ud    = this.selectedModule.userData;
@@ -589,8 +513,6 @@ class KitchenEditor {
             this.ui.updateSelectionLabel(`${title} · ${distToBack} mm`);
         }
     }
-
-    // ── Cámara ────────────────────────────────────────────────
 
     _onViewChange(mode) {
         this.viewMode = mode;
@@ -622,7 +544,68 @@ class KitchenEditor {
         this.orbitControls.update();
     }
 
-    // ── Loop de render ────────────────────────────────────────
+    _saveProject() {
+        const fecha = new Date().toLocaleString('es-ES');
+
+        const modulosGuardados = this.modules.map(m => {
+            const ud = m.userData;
+            // Intenta obtener el color del primer material del primer mesh
+            let colorHex = null;
+            m.traverse(child => {
+                if (!colorHex && child.isMesh && child.material) {
+                    const mat = Array.isArray(child.material) ? child.material[0] : child.material;
+                    if (mat && mat.color) colorHex = '#' + mat.color.getHexString();
+                }
+            });
+            return {
+                tipo:       ud.type        || '',
+                etiqueta:   ud.catalogLabel || ud.type || '',
+                referencia: ud.catalogRef  || '',
+                posicion:   { x: +m.position.x.toFixed(3), y: +m.position.y.toFixed(3), z: +m.position.z.toFixed(3) },
+                rotacion_y: +(m.rotation.y * (180 / Math.PI)).toFixed(1) + '°',
+                escala:     { x: +m.scale.x.toFixed(3), y: +m.scale.y.toFixed(3), z: +m.scale.z.toFixed(3) },
+                dimensiones_cm: {
+                    ancho: ud.w ? Math.round(ud.w * 100) : null,
+                    alto:  ud.h ? Math.round(ud.h * 100) : null,
+                    fondo: ud.d ? Math.round(ud.d * 100) : null,
+                },
+                color: colorHex,
+            };
+        });
+
+        const proyecto = {
+            meta: {
+                generado:   fecha,
+                aplicacion: 'Cocinas Natta – Configurador 3D',
+                version:    '1.0',
+            },
+            cliente: {
+                correo:      this.userEmail      || '—',
+                descripcion: this.userDescription || '—',
+            },
+            espacio: {
+                ancho_m: this.room.dims.width,
+                fondo_m: this.room.dims.depth,
+                alto_m:  this.room.dims.height,
+            },
+            acabados: {
+                color_paredes: this.roomColors.wall,
+                color_suelo:   this.roomColors.floor,
+            },
+            modulos: modulosGuardados,
+        };
+
+        const json    = JSON.stringify(proyecto, null, 2);
+        const blob    = new Blob([json], { type: 'application/json' });
+        const url     = URL.createObjectURL(blob);
+        const a       = document.createElement('a');
+        a.href        = url;
+        a.download    = `proyecto-cocina-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
     _animate() {
         requestAnimationFrame(() => this._animate());
@@ -639,7 +622,4 @@ class KitchenEditor {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────
-//  Arranque
-// ─────────────────────────────────────────────────────────────────
 window.onload = () => new KitchenEditor();

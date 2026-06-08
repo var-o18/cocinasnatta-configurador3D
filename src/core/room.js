@@ -1,10 +1,5 @@
-// ============================================================
-//  room.js — Construcción y gestión de la habitación 3D
-// ============================================================
-
 import * as THREE from 'three';
 
-// Configuración de las tres paredes visibles (no hay pared frontal)
 const WALL_CONFIGS = (w, h, d) => [
     {
         id: 'back',
@@ -38,25 +33,19 @@ export class Room {
         this.dims  = { width: 5, depth: 4, height: 2.5 };
     }
 
-    /**
-     * Construye (o reconstruye) la habitación con las medidas indicadas.
-     */
     build(width, depth, height) {
-        // Limpiar habitación anterior
         if (this.group) this.scene.remove(this.group);
         this.walls = [];
         this.dims  = { width, depth, height };
 
         this.group = new THREE.Group();
 
-        // Suelo
         const floorMat = new THREE.MeshStandardMaterial({ color: '#c19a6b', roughness: 0.3 });
         this.floor = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), floorMat);
         this.floor.rotation.x = -Math.PI / 2;
         this.floor.receiveShadow = true;
         this.group.add(this.floor);
 
-        // Paredes
         const wallMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.8 });
         WALL_CONFIGS(width, height, depth).forEach(conf => {
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(...conf.geo), wallMat.clone());
@@ -71,7 +60,6 @@ export class Room {
         this.scene.add(this.group);
     }
 
-    /** Cambia el color de todas las paredes */
     setWallColor(hexColor) {
         const color = new THREE.Color(hexColor);
         this.walls.forEach(wall => {
@@ -80,7 +68,6 @@ export class Room {
         });
     }
 
-    /** Cambia el color del suelo */
     setFloorColor(hexColor) {
         if (this.floor?.material) {
             this.floor.material.color.set(new THREE.Color(hexColor));
@@ -88,10 +75,6 @@ export class Room {
         }
     }
 
-    /**
-     * Mantiene un objeto completamente dentro de los límites de la habitación.
-     * Para puertas/ventanas respeta el eje de deslizamiento a lo largo de su pared.
-     */
     keepInside(obj) {
         if (!obj) return;
 
@@ -100,7 +83,6 @@ export class Room {
         const hd   = this.dims.depth  / 2 - pad;
         const data = obj.userData;
 
-        // Puertas y ventanas: deslizamiento a lo largo de su pared
         if (data.type === 'door' || data.type === 'window') {
             const wallId   = data.snapWallId;
             const wallPos  = data.snapWallPos;
@@ -116,7 +98,6 @@ export class Room {
             return;
         }
 
-        // Resto de objetos: iteración para corregir por aristas reales
         for (let i = 0; i < 4; i++) {
             obj.updateMatrixWorld(true);
             const box = new THREE.Box3().setFromObject(obj);
@@ -129,15 +110,8 @@ export class Room {
             obj.position.x += dx;
             obj.position.z += dz;
         }
-
-        // Mantener apoyado o a la altura definida por el usuario
-        // (ya no sobreescribimos y = 0 aquí para permitir elevación manual)
     }
 
-
-    /**
-     * Pega un objeto (puerta/ventana) a la superficie de una pared.
-     */
     snapToWall(obj, wall, hitPoint, type) {
         const { id: wallId, normal: wallNormal, position: wallPos } = wall.userData;
         const y = type === 'door' ? 0 : 1.2;
@@ -156,13 +130,11 @@ export class Room {
             obj.position.set(wp.x + wn.x * offset, y, hitPoint.z);
         }
 
-        // Guardar referencia de pared para keepInside
         obj.userData.snapWallId     = wallId;
         obj.userData.snapWallNormal = wn.clone();
         obj.userData.snapWallPos    = wp.clone();
     }
 
-    /** Encuentra la pared más cercana a una posición 3D */
     nearestWall(position) {
         return this.walls.reduce((nearest, wall) => {
             const dist = wall.position.distanceTo(position);

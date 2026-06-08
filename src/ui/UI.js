@@ -1,15 +1,6 @@
-// ============================================================
-//  ui.js — Gestión de la interfaz de usuario
-//  Separa toda la lógica DOM del núcleo del editor.
-// ============================================================
-
-import { CATALOG_META, labelFor, refFor } from '../catalog/catalog.js';
-
+import { CATALOG_META, labelFor, refFor, iconFor } from '../catalog/catalog.js';
 
 export class UI {
-    /**
-     * @param {object} handlers - Callbacks que el editor implementa
-     */
     constructor(handlers) {
         this.handlers = handlers;
         this.renderPalette();
@@ -19,9 +10,6 @@ export class UI {
         this._setupPalette();
         this._setupDimInputs();
     }
-
-
-    // ── Progreso de carga ──────────────────────────────────────
 
     setLoadingStatus(loaded, total) {
         const el = document.getElementById('asset-loader-status');
@@ -33,8 +21,6 @@ export class UI {
         }
     }
 
-    // ── Panel de selección ─────────────────────────────────────
-
     showSelectionPanel(userData, y = 0) {
         const panel = document.getElementById('selected-item-panel');
         const title = document.getElementById('selected-item-name');
@@ -44,7 +30,6 @@ export class UI {
         this._setDimInputs(userData.w, userData.h, userData.d, y);
         panel.style.display = 'block';
     }
-
 
     hideSelectionPanel() {
         const panel = document.getElementById('selected-item-panel');
@@ -65,9 +50,6 @@ export class UI {
         };
     }
 
-
-    // ── Wizard ────────────────────────────────────────────────
-
     setupWizard(onStart) {
         const btn = document.getElementById('start-editor');
         if (!btn) return;
@@ -76,11 +58,13 @@ export class UI {
             e.preventDefault();
             e.stopPropagation();
 
-            const w = parseFloat(document.getElementById('room-width')?.value)  || 5;
-            const d = parseFloat(document.getElementById('room-depth')?.value)  || 4;
-            const h = parseFloat(document.getElementById('room-height')?.value) || 2.5;
+            const w     = parseFloat(document.getElementById('room-width')?.value)  || 5;
+            const d     = parseFloat(document.getElementById('room-depth')?.value)  || 4;
+            const h     = parseFloat(document.getElementById('room-height')?.value) || 2.5;
+            const email = (document.getElementById('user-email')?.value       || '').trim();
+            const desc  = (document.getElementById('user-description')?.value || '').trim();
 
-            onStart(w, d, h);
+            onStart(w, d, h, email, desc);
 
             document.getElementById('setup-wizard').style.display = 'none';
             const app = document.getElementById('app');
@@ -88,11 +72,18 @@ export class UI {
         });
     }
 
+    setupSave(onSave) {
+        const btn = document.getElementById('save-project');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            onSave();
+        });
+    }
+
     blockWizardStart(reason) {
         alert(reason);
     }
-
-    // ── Métodos privados ──────────────────────────────────────
 
     _setDimInputs(w, h, d, y = 0) {
         const update = (id, val) => {
@@ -107,8 +98,6 @@ export class UI {
         update('d', d);
         update('y', y);
     }
-
-
 
     _setupViewControls() {
         document.getElementById('view-2d')?.addEventListener('click', () => {
@@ -133,58 +122,127 @@ export class UI {
     }
 
     _setupColorPickers() {
-        // Color de objeto
+        const hslToHex = (h, s, l) => {
+            s /= 100; l /= 100;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`;
+        };
+
+        const setupInlinePicker = (triggerBtnId, pickerId, previewId, hexId, onColorChange) => {
+            const triggerBtn = document.getElementById(triggerBtnId);
+            const picker     = document.getElementById(pickerId);
+            const preview    = document.getElementById(previewId);
+            const hexDisplay = document.getElementById(hexId);
+            if (!triggerBtn || !picker) return;
+
+            const sliderHue   = picker.querySelector('.picker-hue');
+            const sliderSat   = picker.querySelector('.picker-sat');
+            const sliderLight = picker.querySelector('.picker-light');
+
+            const updateColor = () => {
+                const h = parseInt(sliderHue.value);
+                const s = parseInt(sliderSat.value);
+                const l = parseInt(sliderLight.value);
+                const hex = hslToHex(h, s, l);
+                if (preview) preview.style.background = `hsl(${h}, ${s}%, ${l}%)`;
+                if (hexDisplay) hexDisplay.textContent = hex;
+                sliderHue.style.background = `linear-gradient(to right,
+                    hsl(0,${s}%,${l}%), hsl(30,${s}%,${l}%), hsl(60,${s}%,${l}%),
+                    hsl(120,${s}%,${l}%), hsl(180,${s}%,${l}%), hsl(240,${s}%,${l}%),
+                    hsl(300,${s}%,${l}%), hsl(360,${s}%,${l}%))`;
+                onColorChange(hex);
+            };
+
+            triggerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = picker.style.display !== 'none';
+                picker.style.display = isOpen ? 'none' : 'block';
+                if (!isOpen) updateColor();
+            });
+
+            sliderHue.addEventListener('input', updateColor);
+            sliderSat.addEventListener('input', updateColor);
+            sliderLight.addEventListener('input', updateColor);
+        };
+
         document.querySelectorAll('.obj-swatch[data-color]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const p = document.getElementById('obj-custom-picker');
+                if (p) p.style.display = 'none';
                 this.handlers.onObjectColor?.(btn.dataset.color);
             });
         });
-        const objCustom = document.getElementById('object-custom-color');
-        objCustom?.addEventListener('input',  (e) => { e.stopPropagation(); this.handlers.onObjectColor?.(e.target.value); });
-        objCustom?.addEventListener('change', (e) => { e.stopPropagation(); this.handlers.onObjectColor?.(e.target.value); });
 
-        // Color de paredes
+        setupInlinePicker(
+            'obj-custom-btn',
+            'obj-custom-picker',
+            'obj-picker-preview',
+            'obj-picker-hex',
+            (hex) => this.handlers.onObjectColor?.(hex)
+        );
+
         document.querySelectorAll('.wall-swatch[data-wall-color]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const p = document.getElementById('wall-custom-picker');
+                if (p) p.style.display = 'none';
                 this.handlers.onWallColor?.(btn.dataset.wallColor);
                 document.querySelectorAll('.wall-swatch').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
         });
-        const wallCustom = document.getElementById('wall-custom-color');
-        wallCustom?.addEventListener('input',  (e) => { e.stopPropagation(); this.handlers.onWallColor?.(e.target.value); });
-        wallCustom?.addEventListener('change', (e) => {
-            e.stopPropagation();
-            this.handlers.onWallColor?.(e.target.value);
-            document.querySelectorAll('.wall-swatch').forEach(b => b.classList.remove('active'));
-            e.target.closest('.wall-swatch')?.classList.add('active');
-        });
 
-        // Color de suelo
+        setupInlinePicker(
+            'wall-custom-btn',
+            'wall-custom-picker',
+            'wall-picker-preview',
+            'wall-picker-hex',
+            (hex) => {
+                this.handlers.onWallColor?.(hex);
+                document.querySelectorAll('.wall-swatch').forEach(b => b.classList.remove('active'));
+                document.getElementById('wall-custom-btn')?.classList.add('active');
+            }
+        );
+
         document.querySelectorAll('.floor-swatch[data-floor-color]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const p = document.getElementById('floor-custom-picker');
+                if (p) p.style.display = 'none';
                 this.handlers.onFloorColor?.(btn.dataset.floorColor);
                 document.querySelectorAll('.floor-swatch').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
         });
-    }
 
-    // ── Renderizado Dinámico ───────────────────────────────────
+        setupInlinePicker(
+            'floor-custom-btn',
+            'floor-custom-picker',
+            'floor-picker-preview',
+            'floor-picker-hex',
+            (hex) => {
+                this.handlers.onFloorColor?.(hex);
+                document.querySelectorAll('.floor-swatch').forEach(b => b.classList.remove('active'));
+                document.getElementById('floor-custom-btn')?.classList.add('active');
+            }
+        );
+    }
 
     renderPalette() {
         const sections = {
             kitchen:      document.getElementById('section-kitchen'),
             appliance:    document.getElementById('section-appliance'),
-            seating:      document.getElementById('section-seating'), // Combinamos mesa y silla
+            seating:      document.getElementById('section-seating'),
             architecture: document.getElementById('section-architecture'),
             generic:      document.getElementById('section-generic'),
         };
 
-        // Limpiar secciones
         Object.values(sections).forEach(s => { if (s) s.innerHTML = ''; });
 
         Object.entries(CATALOG_META).forEach(([type, meta]) => {
@@ -215,15 +273,12 @@ export class UI {
     }
 
     _setupPalette() {
-
-        // Acordeón
         document.querySelectorAll('.palette-section-header').forEach(header => {
             header.addEventListener('click', () => {
                 const body    = document.getElementById(`section-${header.dataset.section}`);
                 if (!body) return;
                 const isOpen  = body.style.display === 'block';
 
-                // Cerrar todos
                 document.querySelectorAll('.palette-section-body').forEach(b => b.style.display = 'none');
                 document.querySelectorAll('.palette-chevron').forEach(c => c.style.transform = 'rotate(0deg)');
 
@@ -234,13 +289,11 @@ export class UI {
             });
         });
 
-        // Abrir primera sección por defecto
         const firstBody    = document.querySelector('.palette-section-body');
         const firstChevron = document.querySelector('.palette-chevron');
         if (firstBody)    firstBody.style.display = 'block';
         if (firstChevron) firstChevron.style.transform = 'rotate(180deg)';
 
-        // Favoritos
         document.querySelector('.component-palette')?.addEventListener('click', (e) => {
             const fav = e.target.closest('.palette-fav');
             if (!fav) return;
@@ -252,7 +305,6 @@ export class UI {
             icon?.classList.toggle('fas');
         });
 
-        // Click en ítem de paleta → añadir al centro
         document.querySelectorAll('.palette-item').forEach(item => {
             item.addEventListener('dragstart', (e) => {
                 if (e.target.closest('.palette-fav')) { e.preventDefault(); return; }
@@ -283,7 +335,6 @@ export class UI {
             const input = document.getElementById(id);
             if (!input) return;
 
-
             const handleUpdate = () => {
                 const valSpan = document.getElementById(`val-${id.split('-')[1]}`);
                 if (valSpan) valSpan.textContent = `${input.value} cm`;
@@ -294,5 +345,4 @@ export class UI {
             input.addEventListener('change', handleUpdate);
         });
     }
-
 }

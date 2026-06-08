@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/index-D8LBYfpG.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BAf1_EVA.css">
+  <script type="module" crossorigin src="/assets/index-Cvklx1p9.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D1qcdtAp.css">
 </head>
 <body>
     <!-- Wizard Inicial -->
@@ -90,10 +90,30 @@
                 <button type="button" class="obj-swatch" data-color="#3a5a40" title="Verde bosque" style="background:#3a5a40;"></button>
                 <button type="button" class="obj-swatch" data-color="#4a6fa5" title="Azul marino" style="background:#4a6fa5;"></button>
                 <button type="button" class="obj-swatch" data-color="#c0392b" title="Rojo" style="background:#c0392b;"></button>
-                <label class="obj-swatch obj-swatch--custom" title="Color personalizado">
-                    <i class="fas fa-eye-dropper"></i>
-                    <input type="color" id="object-custom-color" value="#ffffff">
-                </label>
+                <button type="button" class="obj-swatch obj-swatch--custom-trigger" id="obj-custom-btn" title="Color personalizado" style="background: conic-gradient(#ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b); display: flex; align-items: center; justify-content: center; border: 2px solid #fff; cursor: pointer;">
+                    <i class="fas fa-eye-dropper" style="color: white; font-size: 11px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));"></i>
+                </button>
+            </div>
+            <!-- Custom inline color picker for object -->
+            <div class="custom-inline-picker" id="obj-custom-picker" style="display: none;">
+                <div class="inline-picker-sliders">
+                    <div class="inline-picker-field">
+                        <span class="slider-label">Tono</span>
+                        <input type="range" class="picker-hue" min="0" max="360" value="0">
+                    </div>
+                    <div class="inline-picker-field">
+                        <span class="slider-label">Saturación</span>
+                        <input type="range" class="picker-sat" min="0" max="100" value="100">
+                    </div>
+                    <div class="inline-picker-field">
+                        <span class="slider-label">Luminosidad</span>
+                        <input type="range" class="picker-light" min="0" max="100" value="50">
+                    </div>
+                </div>
+                <div class="inline-picker-preview-row">
+                    <div class="picker-preview-color" id="obj-picker-preview"></div>
+                    <span class="picker-preview-hex" id="obj-picker-hex">#ff0000</span>
+                </div>
             </div>
         </div>
         <p>Mantén pulsado el mueble y arrástralo por el suelo.</p>
@@ -175,10 +195,30 @@
                             <button type="button" class="color-btn wall-swatch" title="Gris claro" data-wall-color="#d9d9d9" style="background:#d9d9d9;"></button>
                             <button type="button" class="color-btn wall-swatch" title="Azul pálido" data-wall-color="#d6e4f0" style="background:#d6e4f0;"></button>
                             <button type="button" class="color-btn wall-swatch" title="Verde sage" data-wall-color="#c9d8c5" style="background:#c9d8c5;"></button>
-                            <label class="color-btn wall-swatch wall-swatch--custom" title="Color personalizado" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                                <i class="fas fa-eye-dropper" style="font-size:14px;"></i>
-                                <input type="color" id="wall-custom-color" value="#ffffff" style="opacity:0; position:absolute; width:1px; height:1px;">
-                            </label>
+                            <button type="button" class="color-btn wall-swatch wall-swatch--custom-trigger" id="wall-custom-btn" title="Color personalizado" style="display:flex; align-items:center; justify-content:center; background: conic-gradient(#ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);">
+                                <i class="fas fa-eye-dropper" style="color: white; font-size:14px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));"></i>
+                            </button>
+                        </div>
+                        <!-- Custom inline color picker for walls -->
+                        <div class="custom-inline-picker" id="wall-custom-picker" style="display: none; margin-top: 8px;">
+                            <div class="inline-picker-sliders">
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Tono</span>
+                                    <input type="range" class="picker-hue" min="0" max="360" value="0">
+                                </div>
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Saturación</span>
+                                    <input type="range" class="picker-sat" min="0" max="100" value="100">
+                                </div>
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Luminosidad</span>
+                                    <input type="range" class="picker-light" min="0" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="inline-picker-preview-row">
+                                <div class="picker-preview-color" id="wall-picker-preview"></div>
+                                <span class="picker-preview-hex" id="wall-picker-hex">#ff0000</span>
+                            </div>
                         </div>
                     </div>
                     <div class="control-group" style="margin-top:8px;">
@@ -188,6 +228,30 @@
                             <button type="button" class="color-btn floor-swatch" title="Madera oscura" data-floor-color="#6b4423" style="background:#6b4423;"></button>
                             <button type="button" class="color-btn floor-swatch" title="Gris cemento" data-floor-color="#9e9e9e" style="background:#9e9e9e;"></button>
                             <button type="button" class="color-btn floor-swatch" title="Mármol" data-floor-color="#e8e4df" style="background:#e8e4df;"></button>
+                            <button type="button" class="color-btn floor-swatch floor-swatch--custom-trigger" id="floor-custom-btn" title="Color personalizado" style="display:flex; align-items:center; justify-content:center; background: conic-gradient(#ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);">
+                                <i class="fas fa-eye-dropper" style="color: white; font-size:14px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));"></i>
+                            </button>
+                        </div>
+                        <!-- Custom inline color picker for floor -->
+                        <div class="custom-inline-picker" id="floor-custom-picker" style="display: none; margin-top: 8px;">
+                            <div class="inline-picker-sliders">
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Tono</span>
+                                    <input type="range" class="picker-hue" min="0" max="360" value="0">
+                                </div>
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Saturación</span>
+                                    <input type="range" class="picker-sat" min="0" max="100" value="100">
+                                </div>
+                                <div class="inline-picker-field">
+                                    <span class="slider-label">Luminosidad</span>
+                                    <input type="range" class="picker-light" min="0" max="100" value="50">
+                                </div>
+                            </div>
+                            <div class="inline-picker-preview-row">
+                                <div class="picker-preview-color" id="floor-picker-preview"></div>
+                                <span class="picker-preview-hex" id="floor-picker-hex">#ff0000</span>
+                            </div>
                         </div>
                     </div>
                 </section>
