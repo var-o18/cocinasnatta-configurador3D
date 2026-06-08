@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Cliente | Cocinas Natta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0a0a0a',
+                        surface: '#121212',
+                        'surface-strong': '#171717',
+                        text: '#f6f1e8',
+                        muted: '#b8aea2',
+                        accent: '#c99a6b',
+                        'accent-dark': '#a67f51',
+                    },
+                    boxShadow: {
+                        glow: '0 30px 70px rgba(0, 0, 0, 0.5)',
+                    },
+                    borderRadius: {
+                        xl2: '32px',
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-[radial-gradient(circle_at_top_left,_rgba(201,154,107,0.14),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(0,0,0,0.55),_transparent_28%),linear-gradient(180deg,_#070707_0%,_#0f0f0f_100%)] text-text min-h-screen font-sans">
+    <div class="mx-auto w-full max-w-5xl px-6 py-10">
+        <header class="mb-8 flex flex-col gap-6 rounded-[26px] border border-white/10 bg-surface-strong/95 p-6 shadow-glow backdrop-blur-xl md:flex-row md:items-center">
+            <img src="/cocinasnattalogo.png" alt="Cocinas Natta" class="h-24 w-auto">
+            <div>
+                <h1 class="text-4xl font-semibold tracking-tight text-text">Formulario Cliente</h1>
+                <p class="mt-3 max-w-3xl text-base text-muted">Envía tus datos y la idea de tu cocina para que el equipo de Cocinas Natta te contacte con la mejor propuesta.</p>
+            </div>
+        </header>
+
+        <section class="rounded-[32px] border border-white/10 bg-surface/96 p-8 shadow-glow backdrop-blur-xl">
+            <h2 class="text-3xl font-bold text-accent">Cuéntanos sobre tu proyecto</h2>
+            <p class="mt-4 max-w-2xl text-base text-muted leading-7">Completa este formulario con tu información, estilo preferido y cualquier detalle que quieras que tengamos en cuenta.</p>
+            <p class="mt-4 max-w-2xl text-base text-muted leading-7">Una vez completado se le enviará un correo con la propuesta de diseño.</p>
+
+            <form id="proposal-form" class="mt-8 grid gap-6" action="#" method="post">
+                <div class="grid gap-6 md:grid-cols-2">
+                    <label class="space-y-3 text-sm font-semibold text-text">
+                        <span>Nombre</span>
+                        <input type="text" id="name" name="name" placeholder="Ej. Ana García" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                    </label>
+                    <label class="space-y-3 text-sm font-semibold text-text">
+                        <span>Correo electrónico</span>
+                        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                    </label>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-2">
+                    <label class="space-y-3 text-sm font-semibold text-text">
+                        <span>Teléfono</span>
+                        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                    </label>
+                    
+                </div>
+
+                <label class="space-y-3 text-sm font-semibold text-text">
+                    <span>Descripción del proyecto</span>
+                    <textarea id="message" name="message" placeholder="Describe tus preferencias, materiales, colores y uso del espacio." class="h-36 w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15"></textarea>
+                </label>
+
+                <button type="submit" class="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-gradient-to-r from-[#111111] to-[#1e1e1e] px-6 py-4 text-base font-bold text-text shadow-[0_16px_32px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#c99a6b] hover:text-black">Enviar solicitud</button>
+                <p id="form-status" class="text-sm text-muted"></p>
+            </form>
+
+            <p class="mt-8 text-base leading-7 text-muted">En Cocinas Natta combinamos acabados cálidos y líneas limpias para crear cocinas funcionales y elegantes. Si ya tienes un proyecto en mente, añade toda la información posible.</p>
+        </section>
+    </div>
+
+    <script type="module" src="/src/formularioSubmit.js"></script>
+</body>
+</html>
