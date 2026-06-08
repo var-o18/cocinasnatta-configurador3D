@@ -1022,8 +1022,236 @@ header h1 {
 }
 
 /* ==========================================================================
+   ATMÓSFERA Y MODO DÍA / NOCHE
+   ========================================================================== */
+
+.atmosphere-section {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.atmosphere-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 8px 0 4px;
+}
+
+.atmosphere-icon-day {
+    font-size: 1.1rem;
+    color: #f5c842;
+    filter: drop-shadow(0 0 6px #f5c84280);
+    transition: opacity 0.4s, transform 0.4s;
+}
+
+.atmosphere-icon-night {
+    font-size: 1rem;
+    color: #8ab4f8;
+    filter: drop-shadow(0 0 6px #8ab4f840);
+    transition: opacity 0.4s, transform 0.4s;
+    opacity: 0.35;
+}
+
+.atmosphere-icon-night.active {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px #8ab4f8cc);
+}
+
+.atmosphere-icon-day.dimmed {
+    opacity: 0.3;
+}
+
+/* Toggle Principal Día / Noche */
+.day-night-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.day-night-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.day-night-slider {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #f9cf47, #f5a623);
+    border-radius: 999px;
+    transition: background 0.5s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 12px #f5c84260;
+}
+
+.day-night-slider::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.day-night-switch input:checked + .day-night-slider {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    box-shadow: 0 0 16px #8ab4f860;
+}
+
+.day-night-switch input:checked + .day-night-slider::before {
+    transform: translateX(24px);
+    background: radial-gradient(circle at 35% 35%, #e8e8e8, #ffffff);
+    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.atmosphere-hint {
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    transition: color 0.4s;
+}
+
+.atmosphere-lights-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.atm-light-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.atm-light-label {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+    flex: 1;
+}
+
+.atm-light-label i {
+    width: 14px;
+    text-align: center;
+}
+
+/* Mini Switch para LEDs y Spots */
+.mini-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.mini-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.mini-slider {
+    position: absolute;
+    inset: 0;
+    background: #2a2a2a;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    transition: background 0.3s;
+}
+
+.mini-slider::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #666;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.mini-switch input:checked + .mini-slider {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.mini-switch input:checked + .mini-slider::before {
+    transform: translateX(16px);
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+}
+
+/* Warmth Slider */
+.warmth-slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.warmth-icon {
+    font-size: 0.65rem;
+    color: #8ab4f8;
+}
+
+.warmth-icon.warm {
+    color: #ff9c3a;
+}
+
+.warmth-range {
+    width: 70px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 2px;
+    background: linear-gradient(to right, #8ab4f8, #ff9c3a);
+    outline: none;
+    cursor: pointer;
+}
+
+.warmth-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* Body en modo noche */
+body.night-mode {
+    --canvas-bg: #0a0a0f;
+}
+
+body.night-mode #three-canvas {
+    filter: brightness(0.98);
+}
+
+/* ==========================================================================
    WIDGET Y MODAL DE PRESUPUESTO EN TIEMPO REAL
    ========================================================================== */
+
 
 /* Widget Flotante del Presupuesto */
 .budget-floating-card {

@@ -19,6 +19,8 @@ class KitchenEditor {
         this.userEmail      = '';
         this.userDescription = '';
         this.roomColors     = { wall: '#ffffff', floor: '#c19a6b' };
+        this.nightMode      = false;
+        this.atmosphereLights = {}; // stores references to dynamic lights
 
         this.scene    = new THREE.Scene();
         this.scene.background = new THREE.Color('#ffffff');
@@ -63,12 +65,18 @@ class KitchenEditor {
             this.orbitControls.target.set(0, 1, 0);
             this.orbitControls.update();
             this._updateProjectSummary();
+            // Set initial sky color and rebuild atmosphere lights for new room size
+            this.scene.background = new THREE.Color(this.nightMode ? 0x080c14 : 0xd8e8f0);
+            this._buildAtmosphereLights();
+            if (this.nightMode) this._setNightMode();
         });
 
         this.ui.setupSave(() => this._saveProject());
         this.ui.setupSendRequest(() => this._sendDesignRequest());
         this.ui.setupReset(() => this._resetDesign());
         this.ui.updateProjectSummary(null);
+
+        this._setupAtmosphereControls();
 
         this.assetLoader = new AssetLoader(
             { width: 5, depth: 4 },
@@ -118,11 +126,22 @@ class KitchenEditor {
     }
 
     _setupLights() {
-        this.scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-        const sun = new THREE.DirectionalLight(0xffffff, 2.0);
-        sun.position.set(10, 20, 10);
-        sun.castShadow = true;
-        this.scene.add(sun);
+        // --- Day ambient + directional (sun) ---
+        this.ambientLight = new THREE.AmbientLight(0xfff5e0, 1.5);
+        this.scene.add(this.ambientLight);
+
+        this.sunLight = new THREE.DirectionalLight(0xfff5e0, 2.0);
+        this.sunLight.position.set(8, 18, 8);
+        this.sunLight.castShadow = true;
+        this.sunLight.shadow.mapSize.width  = 1024;
+        this.sunLight.shadow.mapSize.height = 1024;
+        this.sunLight.shadow.camera.near = 0.5;
+        this.sunLight.shadow.camera.far  = 50;
+        this.sunLight.shadow.camera.left = -10;
+        this.sunLight.shadow.camera.right = 10;
+        this.sunLight.shadow.camera.top   = 10;
+        this.sunLight.shadow.camera.bottom= -10;
+        this.scene.add(this.sunLight);
     }
 
     _setupOrbitControls() {
@@ -140,6 +159,196 @@ class KitchenEditor {
             bottom: -size,
         });
         this.orthoCamera.updateProjectionMatrix();
+    }
+
+    // =========================================================================
+    //  SISTEMA DE ATMÓSFERA Y MODO DÍA / NOCHE
+    // =========================================================================
+
+    _setupAtmosphereControls() {
+        const toggle   = document.getElementById('toggle-day-night');
+        const ledChk   = document.getElementById('toggle-led-strip');
+        const spotChk  = document.getElementById('toggle-spots');
+        const warmth   = document.getElementById('light-warmth');
+
+        if (toggle) {
+            toggle.addEventListener('change', () => {
+                this.nightMode = toggle.checked;
+                if (this.nightMode) {
+                    this._setNightMode();
+                } else {
+                    this._setDayMode();
+                }
+            });
+        }
+
+        if (ledChk) {
+            ledChk.addEventListener('change', () => {
+                const al = this.atmosphereLights;
+                const on = ledChk.checked;
+                [al.ledBack, al.ledLeft, al.ledRight].forEach(l => { if (l) l.visible = on; });
+            });
+        }
+
+        if (spotChk) {
+            spotChk.addEventListener('change', () => {
+                const al = this.atmosphereLights;
+                const on = spotChk.checked;
+                [al.spot1, al.spot2, al.spot3].forEach(l => { if (l) l.visible = on; });
+            });
+        }
+
+        if (warmth) {
+            warmth.addEventListener('input', () => {
+                this._updateAtmosphereLightColor(parseInt(warmth.value));
+            });
+        }
+    }
+
+    _buildAtmosphereLights() {
+        // Remove previous atmosphere lights if they exist
+        Object.values(this.atmosphereLights).forEach(l => { if (l) this.scene.remove(l); });
+        this.atmosphereLights = {};
+
+        const { width, depth, height } = this.room.dims;
+        const warmHex = 0xff9c3a;
+
+        // ---- LED Strips bajo armarios (línea trasera de la cocina) ----
+        // Back wall LED strip
+        const ledBack = new THREE.PointLight(warmHex, 0, 4, 1.5);
+        ledBack.position.set(0, height * 0.55, -depth / 2 + 0.15);
+        ledBack.castShadow = false;
+        this.scene.add(ledBack);
+        this.atmosphereLights.ledBack = ledBack;
+
+        // Left wall LED strip
+        const ledLeft = new THREE.PointLight(warmHex, 0, 4, 1.5);
+        ledLeft.position.set(-width / 2 + 0.15, height * 0.55, 0);
+        ledLeft.castShadow = false;
+        this.scene.add(ledLeft);
+        this.atmosphereLights.ledLeft = ledLeft;
+
+        // Right wall LED strip
+        const ledRight = new THREE.PointLight(warmHex, 0, 4, 1.5);
+        ledRight.position.set(width / 2 - 0.15, height * 0.55, 0);
+        ledRight.castShadow = false;
+        this.scene.add(ledRight);
+        this.atmosphereLights.ledRight = ledRight;
+
+        // ---- Ceiling Spots (SpotLights) ----
+        const spotColor = 0xfff5e8;
+        const spotY     = height - 0.05;
+
+        const spot1 = new THREE.SpotLight(spotColor, 0, 5, Math.PI / 6, 0.25, 1.0);
+        spot1.position.set(-width / 4, spotY, -depth / 4);
+        spot1.target.position.set(-width / 4, 0, -depth / 4);
+        spot1.castShadow = true;
+        spot1.shadow.mapSize.width  = 512;
+        spot1.shadow.mapSize.height = 512;
+        this.scene.add(spot1);
+        this.scene.add(spot1.target);
+        this.atmosphereLights.spot1 = spot1;
+
+        const spot2 = new THREE.SpotLight(spotColor, 0, 5, Math.PI / 6, 0.25, 1.0);
+        spot2.position.set(0, spotY, 0);
+        spot2.target.position.set(0, 0, 0);
+        spot2.castShadow = true;
+        spot2.shadow.mapSize.width  = 512;
+        spot2.shadow.mapSize.height = 512;
+        this.scene.add(spot2);
+        this.scene.add(spot2.target);
+        this.atmosphereLights.spot2 = spot2;
+
+        const spot3 = new THREE.SpotLight(spotColor, 0, 5, Math.PI / 6, 0.25, 1.0);
+        spot3.position.set(width / 4, spotY, depth / 4);
+        spot3.target.position.set(width / 4, 0, depth / 4);
+        spot3.castShadow = true;
+        spot3.shadow.mapSize.width  = 512;
+        spot3.shadow.mapSize.height = 512;
+        this.scene.add(spot3);
+        this.scene.add(spot3.target);
+        this.atmosphereLights.spot3 = spot3;
+
+        // Start all invisible; they activate when night mode is toggled
+        Object.values(this.atmosphereLights).forEach(l => { if (l) l.visible = false; });
+    }
+
+    _setDayMode() {
+        // Sky: bright warm white
+        this.scene.background = new THREE.Color(0xd8e8f0);
+        this.ambientLight.color.set(0xfff5e0);
+        this.ambientLight.intensity = 1.5;
+        this.sunLight.intensity = 2.0;
+        this.sunLight.color.set(0xfff5e0);
+
+        // Turn off all atmosphere lights
+        Object.values(this.atmosphereLights).forEach(l => { if (l) { l.intensity = 0; l.visible = false; } });
+
+        // UI feedback
+        document.body.classList.remove('night-mode');
+        const label = document.getElementById('atmosphere-mode-label');
+        const dayIcon = document.getElementById('atm-icon-day');
+        const nightIcon = document.getElementById('atm-icon-night');
+        if (label) label.textContent = 'Modo Día activo';
+        dayIcon?.classList.remove('dimmed');
+        nightIcon?.classList.remove('active');
+
+        // Restore checkbox-driven visibility state
+        const ledOn  = document.getElementById('toggle-led-strip')?.checked ?? true;
+        const spotOn = document.getElementById('toggle-spots')?.checked ?? true;
+        const al = this.atmosphereLights;
+        [al.ledBack, al.ledLeft, al.ledRight].forEach(l => { if (l) l.visible = ledOn; });
+        [al.spot1, al.spot2, al.spot3].forEach(l => { if (l) l.visible = spotOn; });
+    }
+
+    _setNightMode() {
+        // Build lights if room exists and they haven't been built yet
+        if (this.room?.dims && Object.keys(this.atmosphereLights).length === 0) {
+            this._buildAtmosphereLights();
+        }
+
+        // Sky: deep midnight blue
+        this.scene.background = new THREE.Color(0x080c14);
+        this.ambientLight.color.set(0x1a1f30);
+        this.ambientLight.intensity = 0.15;
+        this.sunLight.intensity = 0.0;
+
+        const warmth = parseInt(document.getElementById('light-warmth')?.value ?? 70);
+        this._updateAtmosphereLightColor(warmth);
+
+        // Turn on atmosphere lights with nice intensity
+        const ledOn  = document.getElementById('toggle-led-strip')?.checked ?? true;
+        const spotOn = document.getElementById('toggle-spots')?.checked ?? true;
+        const al = this.atmosphereLights;
+
+        [al.ledBack, al.ledLeft, al.ledRight].forEach(l => {
+            if (l) { l.visible = ledOn; l.intensity = ledOn ? 1.8 : 0; }
+        });
+        [al.spot1, al.spot2, al.spot3].forEach(l => {
+            if (l) { l.visible = spotOn; l.intensity = spotOn ? 2.5 : 0; }
+        });
+
+        // UI feedback
+        document.body.classList.add('night-mode');
+        const label = document.getElementById('atmosphere-mode-label');
+        const dayIcon = document.getElementById('atm-icon-day');
+        const nightIcon = document.getElementById('atm-icon-night');
+        if (label) label.textContent = 'Modo Noche activo';
+        dayIcon?.classList.add('dimmed');
+        nightIcon?.classList.add('active');
+    }
+
+    _updateAtmosphereLightColor(warmthPct) {
+        // 0 = cool blue-white, 100 = warm amber
+        const t = warmthPct / 100;
+        const r = Math.round(210 + t * 45);   // 210 → 255
+        const g = Math.round(220 + t * -60);  // 220 → 160
+        const b = Math.round(255 + t * -175); // 255 → 80
+        const hex = (r << 16) | (g << 8) | b;
+
+        Object.values(this.atmosphereLights).forEach(l => {
+            if (l) l.color.setHex(hex);
+        });
     }
 
     get _activeCamera() {
