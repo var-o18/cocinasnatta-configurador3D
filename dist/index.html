@@ -7,10 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-  <script type="module" crossorigin src="/assets/index-DUHfYI8X.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DgflrAoN.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script type="module" crossorigin src="/assets/index-DXP6exLJ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CT6iFvtW.css">
 </head>
 <body>
     <!-- Wizard Inicial -->
@@ -288,6 +287,57 @@
             </footer>
         </div>
 
+        <!-- Widget Flotante del Presupuesto -->
+        <div id="budget-widget" class="glass-panel budget-floating-card">
+            <div class="budget-title"><i class="fas fa-calculator"></i> Presupuesto Estimado</div>
+            <div class="budget-value" id="budget-total-val">0 €</div>
+            <button type="button" id="open-budget-details" class="primary-btn budget-details-btn">Ver desglose</button>
+        </div>
+
+        <!-- Modal del Desglose de Presupuesto -->
+        <div id="budget-modal" class="overlay modal-overlay" style="display: none;">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Presupuesto de Cocina</h2>
+                    <button type="button" id="close-budget-modal" class="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="budget-client-info">
+                        <p><strong>Cliente:</strong> <span id="budget-client-email">--</span></p>
+                        <p><strong>Fecha:</strong> <span id="budget-current-date">--</span></p>
+                        <p><strong>Dimensiones de cocina:</strong> <span id="budget-room-dims">--</span></p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="budget-table">
+                            <thead>
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Medidas / Características</th>
+                                    <th class="text-right">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="budget-items-body">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">TOTAL ESTIMADO</td>
+                                    <td class="text-right" id="budget-modal-total">0 €</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="budget-notes">
+                        <p>* Los precios son estimados e incluyen el IVA. Sujeto a cambios tras la medición final en obra.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="print-budget-pdf" class="primary-btn"><i class="fas fa-file-pdf"></i> Descargar Presupuesto PDF</button>
+                    <button type="button" id="request-budget-contact" class="secondary-btn">Solicitar diseño personalizado</button>
+                </div>
+            </div>
+        </div>
+
         <div id="fps-hint" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:15px 30px; border-radius:50px; z-index:2000; font-family:sans-serif; text-align:center;">
             <i class="fas fa-keyboard"></i> <b>WASD</b> para moverse | <b>ESC</b> para volver al editor
         </div>
@@ -299,7 +349,6 @@
                 <span>Escalado inteligente automático activado</span>
             </div>
         </div>
-    </div>
-
+    </div>
 </body>
 </html>

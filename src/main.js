@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { CATALOG_META, labelFor, refFor, categoryFor } from './catalog/catalog.js';
+import { CATALOG_META, labelFor, refFor, categoryFor, priceFor } from './catalog/catalog.js';
 import { AssetLoader }                    from './core/loader.js';
 import { Room }                           from './core/room.js';
 import { UI }                             from './ui/ui.js';
@@ -47,6 +47,8 @@ class KitchenEditor {
             onFloorColor:    (hex)       => { this.room.setFloorColor(hex); this.roomColors.floor = hex; this._updateProjectSummary(); },
             onAddModule:     (t,x,z,l,r) => this.createModule(t, x, z, l, r),
             onDimChange:     ()          => this._applyDimInputs(),
+            onOpenBudgetDetails: ()      => this._onOpenBudgetDetails(),
+            onSendRequest:   ()          => this._sendDesignRequest(),
         });
 
         this.ui.setupWizard((w, d, h, email, desc) => {
@@ -663,6 +665,93 @@ class KitchenEditor {
             modulesSummary: this._summarizeModules(),
         };
         this.ui.updateProjectSummary(summary);
+
+        const { total } = this._calculateBudget();
+        this.ui.updateBudgetTotal(total);
+    }
+
+    _calculateBudget() {
+        const items = [];
+        let total = 0;
+
+        // 1. Acabados de Suelo
+        if (this.room && this.room.dims) {
+            const areaSuelo = this.room.dims.width * this.room.dims.depth;
+            const floorPrices = {
+                '#c19a6b': 45, // Madera roble
+                '#6b4423': 55, // Madera oscura
+                '#9e9e9e': 35, // Gris cemento
+                '#e8e4df': 95  // Mármol
+            };
+            const floorLabels = {
+                '#c19a6b': 'Madera Roble',
+                '#6b4423': 'Madera Oscura',
+                '#9e9e9e': 'Gris Cemento',
+                '#e8e4df': 'Mármol premium'
+            };
+            const floorCostPerM2 = floorPrices[this.roomColors.floor] || 50;
+            const floorLabel = floorLabels[this.roomColors.floor] || 'Personalizado';
+            const priceFloor = Math.round(areaSuelo * floorCostPerM2);
+            items.push({
+                label: 'Revestimiento de Suelo',
+                details: `${areaSuelo.toFixed(1)} m² · Acabado ${floorLabel} (${floorCostPerM2}€/m²)`,
+                price: priceFloor
+            });
+            total += priceFloor;
+
+            // 2. Acabados de Pared
+            const areaParedes = (this.room.dims.width * this.room.dims.height * 2) + (this.room.dims.depth * this.room.dims.height * 2);
+            const priceWalls = Math.round(areaParedes * 15); // 15€/m² por pintar
+            items.push({
+                label: 'Pintura de Paredes',
+                details: `${areaParedes.toFixed(1)} m² · Tono ${this.roomColors.wall} (15€/m²)`,
+                price: priceWalls
+            });
+            total += priceWalls;
+        }
+
+        // 3. Módulos y electrodomésticos
+        this.modules.forEach(m => {
+            const ud = m.userData;
+            const basePrice = priceFor(ud.type);
+            let finalPrice = basePrice;
+
+            const isKitchenCabinet = ud.category === 'kitchen' && ud.type.startsWith('mueble') && !ud.type.includes('cocina');
+            const wCm = Math.round((ud.w ?? 0.6) * 100);
+            const hCm = Math.round((ud.h ?? 0.8) * 100);
+            const dCm = Math.round((ud.d ?? 0.6) * 100);
+            
+            let details = '';
+            if (isKitchenCabinet) {
+                const volumeScale = m.scale.x * m.scale.y * m.scale.z;
+                finalPrice = Math.round(basePrice * volumeScale);
+                details = `Dimensiones a medida: ${wCm}x${hCm}x${dCm} cm`;
+            } else {
+                details = ud.catalogRef ? `Ref: ${ud.catalogRef}` : 'Accesorio decorativo';
+            }
+
+            items.push({
+                label: ud.catalogLabel || labelFor(ud.type),
+                details: details,
+                price: finalPrice
+            });
+            total += finalPrice;
+        });
+
+        return { total, items };
+    }
+
+    _onOpenBudgetDetails() {
+        const { total, items } = this._calculateBudget();
+        const dateStr = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+        const roomDimsText = `${this.room.dims.width.toFixed(2)} x ${this.room.dims.depth.toFixed(2)} x ${this.room.dims.height.toFixed(2)} m`;
+        this.ui.showBudgetModal(
+            this.userEmail,
+            dateStr,
+            roomDimsText,
+            items,
+            total
+        );
     }
 
     _summarizeModules() {

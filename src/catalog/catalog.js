@@ -127,6 +127,48 @@ export function iconFor(type) {
     return CATALOG_META[type]?.icon ?? '📦';
 }
 
+export function priceFor(type) {
+    if (CATALOG_META[type] && CATALOG_META[type].price !== undefined) {
+        return CATALOG_META[type].price;
+    }
+    
+    const cat = categoryFor(type);
+    
+    if (type.startsWith('frigo')) return 850;
+    if (type.startsWith('horno')) return 450;
+    if (type.startsWith('extractor')) return 250;
+    if (type.startsWith('fuego')) return 350;
+    if (type.startsWith('lavavajilla')) return 550;
+    if (type.startsWith('microondas')) return 180;
+    if (type.startsWith('cafetera')) return 120;
+    
+    if (type === 'cocina_doble') return 4500;
+    if (type === 'cocina_genova') return 5200;
+    if (type === 'cocina_silver') return 3900;
+    if (type === 'full_kitchen') return 6000;
+    if (type === 'kitchenette') return 1800;
+    if (type === 'cocina') return 3200;
+    if (type === 'kitchen_fbx') return 4800;
+    
+    if (type.startsWith('mueble_fregadero')) return 380;
+    if (type.startsWith('mueble')) {
+        if (type === 'mueble6' || type === 'mueble7') return 480; // columnas despensa/horno
+        return 220; // base/altos
+    }
+    if (type.startsWith('estanteria')) return 95;
+    
+    if (cat === 'table') return 320;
+    if (cat === 'chair') return 85;
+    if (cat === 'door') return 190;
+    if (cat === 'window') return 240;
+    
+    if (type.startsWith('lampara')) return 65;
+    if (type.startsWith('planta')) return 30;
+    if (type.startsWith('papelera')) return 40;
+    
+    return 45; // default decoration / minor asset
+}
+
 export function inferCategoryFromFilename(filename) {
     const n = filename.toLowerCase();
     if (n.includes('cocina') || n.includes('kitchen') || n.includes('mueble') || n.includes('estanteria')) return 'kitchen';
@@ -137,3 +179,4 @@ export function inferCategoryFromFilename(filename) {
     if (n.includes('ventana')) return 'window';
     return 'generic';
 }
+

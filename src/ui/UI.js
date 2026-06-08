@@ -9,6 +9,92 @@ export class UI {
         this._setupColorPickers();
         this._setupPalette();
         this._setupDimInputs();
+        this._setupBudgetUI();
+    }
+
+    _setupBudgetUI() {
+        const openBtn = document.getElementById('open-budget-details');
+        const closeBtn = document.getElementById('close-budget-modal');
+        const printBtn = document.getElementById('print-budget-pdf');
+        const requestBtn = document.getElementById('request-budget-contact');
+        const modal = document.getElementById('budget-modal');
+
+        if (openBtn) {
+            openBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handlers.onOpenBudgetDetails?.();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeBudgetModal();
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) this.closeBudgetModal();
+            });
+        }
+
+        if (printBtn) {
+            printBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.print();
+            });
+        }
+
+        if (requestBtn) {
+            requestBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeBudgetModal();
+                this.handlers.onSendRequest?.();
+            });
+        }
+    }
+
+    updateBudgetTotal(total) {
+        const el = document.getElementById('budget-total-val');
+        if (!el) return;
+        const formatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(total);
+        el.textContent = formatted;
+    }
+
+    showBudgetModal(clientEmail, dateStr, roomDimsText, items, total) {
+        const modal = document.getElementById('budget-modal');
+        if (!modal) return;
+
+        const emailEl = document.getElementById('budget-client-email');
+        const dateEl = document.getElementById('budget-current-date');
+        const dimsEl = document.getElementById('budget-room-dims');
+        const tbody = document.getElementById('budget-items-body');
+        const totalEl = document.getElementById('budget-modal-total');
+
+        if (emailEl) emailEl.textContent = clientEmail || 'Sin proporcionar';
+        if (dateEl) dateEl.textContent = dateStr;
+        if (dimsEl) dimsEl.textContent = roomDimsText;
+
+        const formatCurrency = (val) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+
+        if (tbody) {
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td><strong>${item.label}</strong></td>
+                    <td>${item.details}</td>
+                    <td class="text-right"><strong>${formatCurrency(item.price)}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        if (totalEl) totalEl.textContent = formatCurrency(total);
+        modal.style.display = 'flex';
+    }
+
+    closeBudgetModal() {
+        const modal = document.getElementById('budget-modal');
+        if (modal) modal.style.display = 'none';
     }
 
     setLoadingStatus(loaded, total) {
