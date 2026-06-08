@@ -43,8 +43,8 @@ class KitchenEditor {
             onDuplicate:     ()          => this._duplicateSelected(),
             onLoadShowroom:  ()          => this._loadShowroom(),
             onObjectColor:   (hex)       => this._applyColorToSelected(hex),
-            onWallColor:     (hex)       => { this.room.setWallColor(hex); this.roomColors.wall = hex; },
-            onFloorColor:    (hex)       => { this.room.setFloorColor(hex); this.roomColors.floor = hex; },
+            onWallColor:     (hex)       => { this.room.setWallColor(hex); this.roomColors.wall = hex; this._updateProjectSummary(); },
+            onFloorColor:    (hex)       => { this.room.setFloorColor(hex); this.roomColors.floor = hex; this._updateProjectSummary(); },
             onAddModule:     (t,x,z,l,r) => this.createModule(t, x, z, l, r),
             onDimChange:     ()          => this._applyDimInputs(),
         });
@@ -60,9 +60,12 @@ class KitchenEditor {
             this._updateOrthoCamera();
             this.orbitControls.target.set(0, 1, 0);
             this.orbitControls.update();
+            this._updateProjectSummary();
         });
 
         this.ui.setupSave(() => this._saveProject());
+        this.ui.setupSendRequest(() => this._sendDesignRequest());
+        this.ui.updateProjectSummary(null);
 
         this.assetLoader = new AssetLoader(
             { width: 5, depth: 4 },
@@ -305,6 +308,7 @@ class KitchenEditor {
         this.scene.add(wrapper);
         this.modules.push(wrapper);
         this.selectItem(wrapper);
+        this._updateProjectSummary();
         return wrapper;
     }
 
@@ -429,6 +433,7 @@ class KitchenEditor {
         this.scene.remove(this.selectedModule);
         this.modules = this.modules.filter(m => m !== this.selectedModule);
         this.deselect();
+        this._updateProjectSummary();
     }
 
     _rotateSelected() {
@@ -485,6 +490,7 @@ class KitchenEditor {
 
         this.room.keepInside(this.selectedModule);
         this._updateDimLines();
+        this._updateProjectSummary();
     }
 
     _updateDimLines() {
@@ -605,6 +611,41 @@ class KitchenEditor {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    _sendDesignRequest() {
+        const email = this.userEmail || 'Sin correo';
+        const description = this.userDescription || 'Sin descripción';
+        alert(
+            'Solicitud de diseño personalizada enviada.\n\n' +
+            'Tu proyecto ha sido registrado con los siguientes datos:\n' +
+            `Correo: ${email}\n` +
+            `Descripción: ${description}`
+        );
+    }
+
+    _updateProjectSummary() {
+        const summary = {
+            email: this.userEmail,
+            description: this.userDescription,
+            dimensions: this.room?.dims,
+            wallColor: this.roomColors.wall,
+            floorColor: this.roomColors.floor,
+            itemCount: this.modules.length,
+            modulesSummary: this._summarizeModules(),
+        };
+        this.ui.updateProjectSummary(summary);
+    }
+
+    _summarizeModules() {
+        const counts = {};
+        this.modules.forEach((module) => {
+            const label = module.userData.catalogLabel || labelFor(module.userData.type);
+            counts[label] = (counts[label] || 0) + 1;
+        });
+        return Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([label, amount]) => `${amount}x ${label}`);
     }
 
     _animate() {

@@ -7,14 +7,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/index-Cvklx1p9.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-D1qcdtAp.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script type="module" crossorigin src="/assets/index-gb9d7fMM.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DgflrAoN.css">
 </head>
 <body>
     <!-- Wizard Inicial -->
     <div id="setup-wizard" class="overlay">
         <div class="wizard-content glass-panel">
+            <div class="wizard-logo-container">
+                <img src="/cocinasnattalogo.png" alt="Cocinas Natta" class="wizard-logo">
+            </div>
             <h2>Configura tu Espacio</h2>
             <div id="asset-loader-status" style="margin-bottom: 15px; font-size: 14px; color: #0071e3;">
                 <i class="fas fa-spinner fa-spin"></i> Cargando modelos 3D...
@@ -33,6 +36,14 @@
                     <label>Alto (m)</label>
                     <input type="number" id="room-height" value="2.5" step="0.1">
                 </div>
+            </div>
+            <div class="input-field full-width" style="margin-bottom: 15px;">
+                <label for="user-email">Tu Correo Electrónico</label>
+                <input type="email" id="user-email" placeholder="ejemplo@correo.com" required autocomplete="email">
+            </div>
+            <div class="input-field full-width" style="margin-bottom: 25px;">
+                <label for="user-description">¿Qué tipo de cocina buscas?</label>
+                <textarea id="user-description" rows="2" placeholder="Ej: Cocina moderna, color verde sage con isla, tiradores dorados..." style="resize: none;"></textarea>
             </div>
             <button type="button" id="start-editor" class="primary-btn">Comenzar diseño</button>
         </div>
@@ -165,7 +176,9 @@
 
         <div class="ui-container">
             <header>
-                <h1>Configurador Pro</h1>
+                <div class="editor-logo-container">
+                    <img src="/cocinasnattalogo.png" alt="Cocinas Natta" class="editor-logo">
+                </div>
                 <div id="header-selection-hint">Selecciona un objeto para editar</div>
             </header>
 
@@ -255,10 +268,21 @@
                         </div>
                     </div>
                 </section>
+
+                <section class="config-section">
+                    <h3>Resumen de proyecto</h3>
+                    <div id="project-summary" class="project-summary">
+                        <div class="summary-item">
+                            <span>Resumen</span>
+                            <strong>Diseña tu cocina para ver los detalles del proyecto.</strong>
+                        </div>
+                    </div>
+                    <button type="button" id="send-request" class="primary-btn" style="margin-top: 0.75rem;">Solicitar diseño personalizado</button>
+                </section>
             </div>
 
             <footer>
-                <button type="button" class="primary-btn">Guardar Proyecto</button>
+                <button type="button" id="save-project" class="secondary-btn">Exportar ficha de proyecto</button>
             </footer>
         </div>
 
@@ -273,6 +297,6 @@
                 <span>Escalado inteligente automático activado</span>
             </div>
         </div>
-    </div>
+    </div>
 </body>
 </html>

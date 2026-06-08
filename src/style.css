@@ -428,6 +428,68 @@ header h1 {
     transform: scale(1.06);
 }
 
+.project-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    margin-top: 10px;
+}
+
+.project-summary .summary-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.project-summary .summary-item:last-child {
+    border-bottom: none;
+}
+
+.project-summary .summary-item span {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.project-summary .summary-item strong {
+    color: var(--text);
+    font-size: 0.86rem;
+    text-align: right;
+    font-weight: 600;
+}
+
+.project-summary .summary-colors {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.project-summary .summary-colors .summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.project-summary .summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    font-size: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .swatch-stone {
     background: linear-gradient(145deg, #b8b5b0, #8e8b87) !important;
 }

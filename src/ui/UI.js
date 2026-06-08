@@ -81,6 +81,70 @@ export class UI {
         });
     }
 
+    setupSendRequest(onSend) {
+        const btn = document.getElementById('send-request');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            onSend();
+        });
+    }
+
+    updateProjectSummary(summary) {
+        const container = document.getElementById('project-summary');
+        if (!container) return;
+
+        if (!summary || !summary.dimensions) {
+            container.innerHTML = `
+                <div class="summary-item">
+                    <span>Resumen</span>
+                    <strong>Diseña tu cocina para ver los detalles del proyecto.</strong>
+                </div>`;
+            return;
+        }
+
+        const dimensions = `${summary.dimensions.width.toFixed(2)} x ${summary.dimensions.depth.toFixed(2)} x ${summary.dimensions.height.toFixed(2)} m`;
+        const emailNote = summary.email ? summary.email : 'No se ha proporcionado correo';
+        const descriptionNote = summary.description ? summary.description : 'Sin descripción añadida';
+        const moduleRows = summary.modulesSummary.length > 0
+            ? summary.modulesSummary.map(line => `
+                <div class="summary-item">
+                    <span>Elemento</span>
+                    <strong>${line}</strong>
+                </div>`).join('')
+            : `
+                <div class="summary-item">
+                    <span>Elementos</span>
+                    <strong>Aún no hay módulos añadidos</strong>
+                </div>`;
+
+        container.innerHTML = `
+            <div class="summary-item">
+                <span>Cliente</span>
+                <strong>${emailNote}</strong>
+            </div>
+            <div class="summary-item">
+                <span>Descripción</span>
+                <strong>${descriptionNote}</strong>
+            </div>
+            <div class="summary-item">
+                <span>Dimensiones</span>
+                <strong>${dimensions}</strong>
+            </div>
+            <div class="summary-item summary-colors">
+                <span>Acabados</span>
+                <div class="summary-chips">
+                    <span class="summary-chip" style="background:${summary.wallColor};">Pared: ${summary.wallColor}</span>
+                    <span class="summary-chip" style="background:${summary.floorColor};">Suelo: ${summary.floorColor}</span>
+                </div>
+            </div>
+            <div class="summary-item">
+                <span>Elementos</span>
+                <strong>${summary.itemCount} añadidos</strong>
+            </div>
+            ${moduleRows}`;
+    }
+
     blockWizardStart(reason) {
         alert(reason);
     }
