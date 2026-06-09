@@ -190,6 +190,43 @@
                     <button type="button" id="load-showroom" class="primary-btn btn-showroom"><i class="fas fa-eye"></i> Ver Cocina de Exposición</button>
                 </section>
 
+                <section class="config-section atmosphere-section">
+                    <h3><i class="fas fa-lightbulb" style="color:var(--accent); margin-right:6px;"></i>Atmósfera</h3>
+                    <div class="atmosphere-toggle-row">
+                        <i class="fas fa-sun atmosphere-icon-day" id="atm-icon-day"></i>
+                        <label class="day-night-switch" for="toggle-day-night" title="Alternar modo Día / Noche">
+                            <input type="checkbox" id="toggle-day-night">
+                            <span class="day-night-slider"></span>
+                        </label>
+                        <i class="fas fa-moon atmosphere-icon-night" id="atm-icon-night"></i>
+                    </div>
+                    <p class="atmosphere-hint" id="atmosphere-mode-label">Modo Día activo</p>
+                    <div class="atmosphere-lights-grid">
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-stream"></i> LEDs bajo armarios</label>
+                            <label class="mini-switch">
+                                <input type="checkbox" id="toggle-led-strip" checked>
+                                <span class="mini-slider"></span>
+                            </label>
+                        </div>
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-dot-circle"></i> Spots de techo</label>
+                            <label class="mini-switch">
+                                <input type="checkbox" id="toggle-spots" checked>
+                                <span class="mini-slider"></span>
+                            </label>
+                        </div>
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-fire"></i> Cálido / Frío</label>
+                            <div class="warmth-slider-wrapper">
+                                <i class="fas fa-temperature-low warmth-icon"></i>
+                                <input type="range" id="light-warmth" min="0" max="100" value="70" class="warmth-range">
+                                <i class="fas fa-temperature-high warmth-icon warm"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="config-section">
                     <h3>Acabado</h3>
                     <div class="control-group">
@@ -260,11 +297,74 @@
                         </div>
                     </div>
                 </section>
+
+                <section class="config-section">
+                    <h3>Resumen de proyecto</h3>
+                    <div id="project-summary" class="project-summary">
+                        <div class="summary-item">
+                            <span>Resumen</span>
+                            <strong>Diseña tu cocina para ver los detalles del proyecto.</strong>
+                        </div>
+                    </div>
+                    <button type="button" id="send-request" class="primary-btn" style="margin-top: 0.75rem;">Solicitar diseño personalizado</button>
+                </section>
             </div>
 
             <footer>
-                <button type="button" id="save-project" class="primary-btn">Guardar Proyecto</button>
+                <button type="button" id="reset-design" class="primary-btn btn-danger" style="margin-bottom:8px;">Reiniciar diseño</button>
+                <button type="button" id="save-project" class="secondary-btn">Exportar ficha de proyecto</button>
             </footer>
+        </div>
+
+        <!-- Widget Flotante del Presupuesto -->
+        <div id="budget-widget" class="glass-panel budget-floating-card">
+            <div class="budget-title"><i class="fas fa-calculator"></i> Presupuesto Estimado</div>
+            <div class="budget-value" id="budget-total-val">0 €</div>
+            <button type="button" id="open-budget-details" class="primary-btn budget-details-btn">Ver desglose</button>
+        </div>
+
+        <!-- Modal del Desglose de Presupuesto -->
+        <div id="budget-modal" class="overlay modal-overlay" style="display: none;">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Presupuesto de Cocina</h2>
+                    <button type="button" id="close-budget-modal" class="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="budget-client-info">
+                        <p><strong>Cliente:</strong> <span id="budget-client-email">--</span></p>
+                        <p><strong>Fecha:</strong> <span id="budget-current-date">--</span></p>
+                        <p><strong>Dimensiones de cocina:</strong> <span id="budget-room-dims">--</span></p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="budget-table">
+                            <thead>
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Medidas / Características</th>
+                                    <th class="text-right">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="budget-items-body">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">TOTAL ESTIMADO</td>
+                                    <td class="text-right" id="budget-modal-total">0 €</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="budget-notes">
+                        <p>* Los precios son estimados e incluyen el IVA. Sujeto a cambios tras la medición final en obra.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="print-budget-pdf" class="primary-btn"><i class="fas fa-file-pdf"></i> Descargar Presupuesto PDF</button>
+                    <button type="button" id="request-budget-contact" class="secondary-btn">Solicitar diseño personalizado</button>
+                </div>
+            </div>
         </div>
 
         <div id="fps-hint" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:15px 30px; border-radius:50px; z-index:2000; font-family:sans-serif; text-align:center;">
