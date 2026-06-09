@@ -1,4 +1,4 @@
-import { API_ENDPOINT } from './env-config.js';
+import { API_ENDPOINT, PROPUESTA_URL } from './env-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('proposal-form');
@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusEl.className = 'text-sm text-accent';
             }
             form.reset();
+
+            setTimeout(() => {
+                window.location.href = PROPUESTA_URL;
+            }, 1000);
+
+
         } catch (error) {
             if (statusEl) {
                 statusEl.textContent = 'No se pudo conectar con el servidor. Comprueba el backend y CORS.';
