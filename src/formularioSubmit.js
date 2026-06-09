@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             telefono: (form.phone?.value || '').trim(),
             descripcion: form.message.value.trim(),
             archivo_pdf: null,
+            elementos: JSON.parse(sessionStorage.getItem('kitchen_elements') || '[]')
         };
 
         try {
@@ -44,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusEl.className = 'text-sm text-accent';
             }
             form.reset();
+
+            sessionStorage.removeItem('kitchen_elements');
+            sessionStorage.removeItem('kitchen_screenshot');
 
             setTimeout(() => {
                 window.location.href = PROPUESTA_URL;

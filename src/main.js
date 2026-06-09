@@ -63,6 +63,21 @@ class KitchenEditor {
         });
 
         this.ui.setupSave(() => {
+
+            const data = this.getSelectedElementsForBackend();
+
+            sessionStorage.setItem(
+                'kitchen_elements',
+                JSON.stringify(data)
+            );
+
+            const screenshot = this.renderer.domElement.toDataURL('image/png');
+
+            sessionStorage.setItem(
+                'kitchen_screenshot',
+                screenshot
+            );
+
             window.location.href = 'formularioCliente.html';
         });
 
@@ -622,6 +637,28 @@ class KitchenEditor {
         this._updateOrthoCamera();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
+
+    getSelectedElementsForBackend() {
+        const map = {};
+
+        this.modules.forEach(m => {
+            const type = m.userData.type;
+
+            if (!map[type]) {
+                map[type] = {
+                    nombre: m.userData.catalogLabel || type,
+                    tipo: type,
+                    cantidad: 0
+                };
+            }
+
+            map[type].cantidad++;
+        });
+
+        return Object.values(map);
+    }
 }
 
-window.onload = () => new KitchenEditor();
+window.onload = () => {
+    window.kitchenEditor = new KitchenEditor();
+};
