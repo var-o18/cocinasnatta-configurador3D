@@ -43,33 +43,35 @@
             <h2 class="text-3xl font-bold text-accent">Cuéntanos sobre tu proyecto</h2>
             <p class="mt-4 max-w-2xl text-base text-muted leading-7">Completa este formulario con tu información, estilo preferido y cualquier detalle que quieras que tengamos en cuenta.</p>
             <p class="mt-4 max-w-2xl text-base text-muted leading-7">Una vez completado se le enviará un correo con la propuesta de diseño.</p>
-
+            <p class="mt-4 max-w-2xl text-base text-muted leading-6">* Todos los campos son obligatorios</p>
             <form id="proposal-form" class="mt-8 grid gap-6" action="#" method="post">
                 <div class="grid gap-6 md:grid-cols-2">
                     <label class="space-y-3 text-sm font-semibold text-text">
                         <span>Nombre</span>
-                        <input type="text" id="name" name="name" placeholder="Ej. Ana García" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                        <input type="text" id="name" name="name" placeholder="Ej. Ana García" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15 required" />
                     </label>
                     <label class="space-y-3 text-sm font-semibold text-text">
                         <span>Correo electrónico</span>
-                        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15 required" />
                     </label>
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-2">
                     <label class="space-y-3 text-sm font-semibold text-text">
                         <span>Teléfono</span>
-                        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" />
+                        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" class="w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15 required" />
                     </label>
                     
                 </div>
 
                 <label class="space-y-3 text-sm font-semibold text-text">
                     <span>Descripción del proyecto</span>
-                    <textarea id="message" name="message" placeholder="Describe tus preferencias, materiales, colores y uso del espacio." class="h-36 w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15"></textarea>
+                    <textarea id="message" name="message" placeholder="Describe tus preferencias, materiales, colores y uso del espacio." class="h-36 w-full rounded-2xl border border-white/10 bg-[#121212] px-4 py-4 text-text outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15 required"></textarea>
                 </label>
 
-                <button type="submit" class="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-gradient-to-r from-[#111111] to-[#1e1e1e] px-6 py-4 text-base font-bold text-text shadow-[0_16px_32px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#c99a6b] hover:text-black">Enviar solicitud</button>
+                <button id="submit-btn" type="submit" class="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-gradient-to-r from-[#111111] to-[#1e1e1e] px-6 py-4 text-base font-bold text-text shadow-[0_16px_32px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#c99a6b] ">
+                    <span id="btn-text">Enviar solicitud</span>
+                </button>
                 <p id="form-status" class="text-sm text-muted"></p>
             </form>
 

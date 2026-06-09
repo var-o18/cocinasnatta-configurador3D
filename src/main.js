@@ -71,7 +71,22 @@ class KitchenEditor {
                 JSON.stringify(data)
             );
 
+            const oldPos = this.camera.position.clone();
+            const oldTarget = this.orbitControls.target.clone();
+
+            // vista fija para PDF
+            this.camera.position.set(8, 8, 8);
+            this.orbitControls.target.set(0, 0, 0);
+            this.orbitControls.update();
+
+            this.renderer.render(this.scene, this.camera);
+
             const screenshot = this.renderer.domElement.toDataURL('image/png');
+
+            // restaurar vista usuario
+            this.camera.position.copy(oldPos);
+            this.orbitControls.target.copy(oldTarget);
+            this.orbitControls.update();
 
             sessionStorage.setItem(
                 'kitchen_screenshot',
@@ -107,6 +122,7 @@ class KitchenEditor {
                 alpha: true,
                 precision: 'mediump',
                 powerPreference: 'default',
+                preserveDrawingBuffer: true
             });
             this.renderer.setSize(window.innerWidth, window.innerHeight);
             this.renderer.setPixelRatio(1);
