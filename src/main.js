@@ -62,7 +62,6 @@ class KitchenEditor {
             this.orbitControls.update();
         });
 
-        //this.ui.setupSave(() => this._saveProject());
         this.ui.setupSave(() => {
             window.location.href = 'formularioCliente.html';
         });
