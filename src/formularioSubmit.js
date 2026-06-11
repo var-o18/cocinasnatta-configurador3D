@@ -20,10 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const payload = {
-            nombre: form.name.value.trim(),
-            email: form.email.value.trim(),
-            telefono: (form.phone?.value || '').trim(),
-            descripcion: form.message.value.trim(),
+            nombre: form.elements['name'].value.trim(),
+            email: form.elements['email'].value.trim(),
+            telefono: (form.elements['phone']?.value || '').trim(),
+            descripcion: form.elements['message'].value.trim(),
             archivo_pdf: null,
             elementos: JSON.parse(sessionStorage.getItem('kitchen_elements') || '[]'),
             imagen_diseno: screenshot
