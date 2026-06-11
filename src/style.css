@@ -52,7 +52,7 @@ body {
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(211, 207, 207, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 2000;
@@ -78,6 +78,7 @@ body {
 .wizard-content::-webkit-scrollbar {
     width: 6px;
 }
+
 .wizard-content::-webkit-scrollbar-thumb {
     background: rgba(201, 154, 107, 0.3);
     border-radius: 99px;
@@ -121,6 +122,7 @@ body {
         opacity: 0;
         transform: scale(0.96) translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -135,7 +137,7 @@ body {
     letter-spacing: -0.02em;
 }
 
-.wizard-content > p {
+.wizard-content>p {
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-bottom: 1.25rem;
@@ -214,7 +216,7 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-.ui-container > * {
+.ui-container>* {
     pointer-events: auto;
 }
 
@@ -944,6 +946,7 @@ header h1 {
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -1096,18 +1099,18 @@ header h1 {
     border-radius: 50%;
     background: white;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-.day-night-switch input:checked + .day-night-slider {
+.day-night-switch input:checked+.day-night-slider {
     background: linear-gradient(135deg, #1a1a2e, #16213e);
     box-shadow: 0 0 16px #8ab4f860;
 }
 
-.day-night-switch input:checked + .day-night-slider::before {
+.day-night-switch input:checked+.day-night-slider::before {
     transform: translateX(24px);
     background: radial-gradient(circle at 35% 35%, #e8e8e8, #ffffff);
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.3);
+    box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .atmosphere-hint {
@@ -1188,12 +1191,12 @@ header h1 {
     transition: transform 0.3s, background 0.3s;
 }
 
-.mini-switch input:checked + .mini-slider {
+.mini-switch input:checked+.mini-slider {
     background: var(--accent-soft);
     border-color: var(--accent);
 }
 
-.mini-switch input:checked + .mini-slider::before {
+.mini-switch input:checked+.mini-slider::before {
     transform: translateX(16px);
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
@@ -1236,7 +1239,7 @@ header h1 {
     border-radius: 50%;
     background: white;
     cursor: pointer;
-    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Body en modo noche */
@@ -1477,8 +1480,13 @@ body.night-mode #three-canvas {
 }
 
 @keyframes fadeInBudget {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes scaleInBudget {
@@ -1486,6 +1494,7 @@ body.night-mode #three-canvas {
         opacity: 0;
         transform: scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -1498,13 +1507,16 @@ body.night-mode #three-canvas {
         background: white !important;
         color: black !important;
     }
+
     body * {
         visibility: hidden;
     }
-    #budget-modal, 
+
+    #budget-modal,
     #budget-modal * {
         visibility: visible;
     }
+
     #budget-modal {
         position: absolute;
         left: 0;
@@ -1518,6 +1530,7 @@ body.night-mode #three-canvas {
         box-shadow: none !important;
         border: none !important;
     }
+
     .modal-overlay {
         background: transparent !important;
         position: static !important;
@@ -1525,6 +1538,7 @@ body.night-mode #three-canvas {
         padding: 0 !important;
         backdrop-filter: none !important;
     }
+
     .modal-content {
         box-shadow: none !important;
         border: none !important;
@@ -1535,18 +1549,22 @@ body.night-mode #three-canvas {
         position: static !important;
         color: black !important;
     }
+
     .modal-header {
         border-bottom: 2px solid #000 !important;
         padding: 10px 0 !important;
     }
+
     .modal-header h2 {
         color: black !important;
         font-size: 1.5rem !important;
     }
+
     .close-modal-btn,
     .modal-actions {
         display: none !important;
     }
+
     .budget-client-info {
         background: #f5f5f5 !important;
         border: 1px solid #ccc !important;
@@ -1554,31 +1572,36 @@ body.night-mode #three-canvas {
         padding: 12px !important;
         margin-bottom: 15px !important;
     }
-    .budget-client-info p, 
+
+    .budget-client-info p,
     .budget-client-info span {
         color: black !important;
     }
+
     .table-responsive {
         border: 1px solid #ccc !important;
     }
+
     .budget-table th {
         background: #e6e6e6 !important;
         color: black !important;
         border-bottom: 2px solid black !important;
     }
+
     .budget-table td {
         color: black !important;
         border-bottom: 1px solid #ccc !important;
     }
+
     .total-row td {
         color: black !important;
         border-top: 2px solid black !important;
         background: #f9f9f9 !important;
         font-size: 1.1rem !important;
     }
+
     .budget-notes {
         color: #555 !important;
         margin-top: 15px !important;
     }
 }
-
