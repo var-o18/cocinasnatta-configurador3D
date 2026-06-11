@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elementos: JSON.parse(sessionStorage.getItem('kitchen_elements') || '[]'),
             imagen_diseno: screenshot
         };
-
+        //sdlkjshadsdjh
         try {
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
