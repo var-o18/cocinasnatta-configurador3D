@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CATALOG_META, labelFor, refFor, categoryFor, priceFor } from './catalog/catalog.js';
 import { AssetLoader }                    from './core/loader.js';
 import { Room }                           from './core/room.js';
-import { UI }                             from './ui/ui.js';
+import { UI }                             from './ui/UI.js';
 
 class KitchenEditor {
     constructor() {
