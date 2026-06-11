@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/index-DXP6exLJ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CT6iFvtW.css">
+  <script type="module" crossorigin src="/assets/index-DNn9AWgI.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DMd81kej.css">
 </head>
 <body>
     <!-- Wizard Inicial -->
@@ -37,14 +37,7 @@
                     <input type="number" id="room-height" value="2.5" step="0.1">
                 </div>
             </div>
-            <div class="input-field full-width" style="margin-bottom: 15px;">
-                <label for="user-email">Tu Correo Electrónico</label>
-                <input type="email" id="user-email" placeholder="ejemplo@correo.com" required autocomplete="email">
-            </div>
-            <div class="input-field full-width" style="margin-bottom: 25px;">
-                <label for="user-description">¿Qué tipo de cocina buscas?</label>
-                <textarea id="user-description" rows="2" placeholder="Ej: Cocina moderna, color verde sage con isla, tiradores dorados..." style="resize: none;"></textarea>
-            </div>
+            
             <button type="button" id="start-editor" class="primary-btn">Comenzar diseño</button>
         </div>
     </div>
@@ -196,6 +189,43 @@
                     <h3>Experiencia</h3>
                     <button type="button" id="toggle-fps" class="secondary-btn"><i class="fas fa-walking"></i> Visita Virtual 3D</button>
                     <button type="button" id="load-showroom" class="primary-btn btn-showroom"><i class="fas fa-eye"></i> Ver Cocina de Exposición</button>
+                </section>
+
+                <section class="config-section atmosphere-section">
+                    <h3><i class="fas fa-lightbulb" style="color:var(--accent); margin-right:6px;"></i>Atmósfera</h3>
+                    <div class="atmosphere-toggle-row">
+                        <i class="fas fa-sun atmosphere-icon-day" id="atm-icon-day"></i>
+                        <label class="day-night-switch" for="toggle-day-night" title="Alternar modo Día / Noche">
+                            <input type="checkbox" id="toggle-day-night">
+                            <span class="day-night-slider"></span>
+                        </label>
+                        <i class="fas fa-moon atmosphere-icon-night" id="atm-icon-night"></i>
+                    </div>
+                    <p class="atmosphere-hint" id="atmosphere-mode-label">Modo Día activo</p>
+                    <div class="atmosphere-lights-grid">
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-stream"></i> LEDs bajo armarios</label>
+                            <label class="mini-switch">
+                                <input type="checkbox" id="toggle-led-strip" checked>
+                                <span class="mini-slider"></span>
+                            </label>
+                        </div>
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-dot-circle"></i> Spots de techo</label>
+                            <label class="mini-switch">
+                                <input type="checkbox" id="toggle-spots" checked>
+                                <span class="mini-slider"></span>
+                            </label>
+                        </div>
+                        <div class="atm-light-row">
+                            <label class="atm-light-label"><i class="fas fa-fire"></i> Cálido / Frío</label>
+                            <div class="warmth-slider-wrapper">
+                                <i class="fas fa-temperature-low warmth-icon"></i>
+                                <input type="range" id="light-warmth" min="0" max="100" value="70" class="warmth-range">
+                                <i class="fas fa-temperature-high warmth-icon warm"></i>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <section class="config-section">
